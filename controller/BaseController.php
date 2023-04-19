@@ -20,6 +20,7 @@ class BaseController
      */
     protected function getQueryStringParams()
     {
-        return parse_str($_SERVER['QUERY_STRING'], $query);
+        parse_str($_SERVER['QUERY_STRING'], $parsed);
+        return $parsed;
     }
 }
