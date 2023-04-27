@@ -64,6 +64,20 @@ class UserController extends BaseController
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $userData]);
                 break;
+                
+            case "register":
+                $json = file_get_contents('php://input');
+                $data = json_decode($json);
+                echo json_encode($data);
+                if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
+                {
+                    //invio mail,
+                    echo "ciao";
+                }else{
+                    //messaggio errore
+                    echo "errore";
+                }
+                break;
         }
     }
 }

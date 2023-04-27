@@ -17,8 +17,14 @@ class TimeController extends BaseController
 
         switch ($this->uri) {
             case "getHour":
+                $hours = $time->getHour();
+                http_response_code(200);
+                echo json_encode(["success" => true, "data" => $hours]);
                 break;
             case "getDay":
+                $days = $time->getDay();
+                http_response_code(200);
+                echo json_encode(["success" => true, "data" => $days]);
                 break;
         }
     }
