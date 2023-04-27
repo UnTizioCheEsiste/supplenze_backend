@@ -33,12 +33,12 @@ class User extends Database
         $stmt->bindValue(":password", $password, PDO::PARAM_STR);
 
         $stmt->execute();
-        $pwd1 = $stmt->fetch(PDO::FETCH_ASSOC);
+        $pwdLoginNormale = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo la presenza dell'id dell'utente nella tabella reset
-        $sql = "SELECT r.user_id, r.expires, r.completed
+        $sql = "SELECT r.user_id AS id, r.expires, r.completed
                 FROM `reset` r
-                INNER JOIN user u ON u.id = r.user_id
+                INNER JOIN utente u ON u.id = r.user_id
                 WHERE u.email = :email AND r.`password` = :password";
         
         $stmt = $this->conn->prepare($sql);
@@ -46,20 +46,14 @@ class User extends Database
         $stmt->bindValue(":password", $password, PDO::PARAM_STR);
 
         $stmt->execute();
-        $pwd2 = $stmt->fetch(PDO::FETCH_ASSOC);
+        $pwdLoginReset = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo che esista l'user_id, che la data dell'expires sia maggiore del giorno attuale e che la reset non sia completed
-        echo json_encode(date());
-        if (!empty($pwd2["user_id"]) && strtotime($pwd2["expires"]) > strtotime(date("Y-m-d")) && pwd2["completed"] == 0){
-            // Controllo l'esistenza dell'utente nella tabella user controllando le credenziali
-            if(!empty($pwd1["id"])){
-                // In questo caso, posso effettuare il login
-                // return json_encode(pwd1["id"] + pwd1["password"]);
-            } else {
-                //è sbagliato il login
-                return 0;
-            }
+        if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["expires"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completed"] == 0){
+            return $pwdLoginReset["id"];
         }
+
+        return $pwdLoginNormale["id"];
     }
 
     public function register($nome, $cognome, $email, $telefono, $privilegio)
