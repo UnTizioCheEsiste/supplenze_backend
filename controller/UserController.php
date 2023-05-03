@@ -105,6 +105,22 @@ class UserController extends BaseController
                     echo json_encode(["success" => false, "data" => "Errore nella modifica della password."]);
                 }
                 break;
+            case "getArchiveUser":
+                $userInfo = $user->getArchiveUser();
+                
+                if (empty($userInfo)) {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                    break;
+                }
+
+                http_response_code(200);
+                echo json_encode(["success" => true, "data" => $userInfo]);
+                break;
+            
+            case "Get Archive User Absence":
+                break;
+            
         }
     }
 }

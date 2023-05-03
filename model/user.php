@@ -154,5 +154,22 @@ class User extends Database
 
         return $stmt->rowCount();
     }
+    
+    public function getArchiveUser()
+    {
+        $sql = "SELECT utente.nome, utente.cognome, utente.email, p.nome as privilegio , utente.telefono
+        FROM utente
+        inner join privilegio p on p.id=utente.privilegio
+        WHERE 1=1";
 
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function GetArchiveUserAbsence($id)
+    {
+
+    }
 }

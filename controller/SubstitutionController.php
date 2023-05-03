@@ -37,8 +37,7 @@ class SubstitutionController extends BaseController
             // case "addSubtituteTeaching":
             //     break;
             case "getArchiveSubstitution":
-                $ArchiveSub = $sub->getArchiveSubstitution();
-
+                $archiveSub = $sub->getArchiveSubstitution();
                 if(empty($archiveSub)){
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Errore nell'operazione"]);
@@ -49,16 +48,21 @@ class SubstitutionController extends BaseController
                 break;
             case "getArchiveUserSubstitution":
                 $params = $this->getQueryStringParams();
-                $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
-
-                if(empty($archiveUserSub)){
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Errore nell'operazione"]);
+                if(!empty($params))
+                {
+                    $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
+                    if(empty($archiveUserSub)){
+                        http_response_code(500);
+                        echo json_encode(["success" => false, "data" => "L'utente non ha supplenze"]);
+                        break;
+                    }
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $archiveUserSub]); 
                     break;
+                }else{
+                    echo json_encode(["success" => false, "data" => "Errore nell'operazione"]);
                 }
-                http_response_code(200);
-                echo json_encode(["success" => true, "data" => $archiveUserSub]); 
-                break;
+                
         }
     }
 }

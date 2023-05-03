@@ -31,17 +31,22 @@ class Substitution extends Database
 
     public function getArchiveSubstitution() { 
         // Restituisce la lista delle supplenze. Assente e supplente sono delle concatenazioni di nome e cognome
-        $sql = "SELECT s.id, CONCAT(u.nome, ' ', u.cognome) as assente, CONCAT(u2.nome, ' ', u2.cognome) as supplente, CONCAT(o.data_inizio, ' - ', o.data_fine) as ora, s.da_retribuire
-                FROM supplenza s
-                INNER JOIN assenza a
-                ON a.id = s.assenza
-                INNER JOIN utente u
-                ON u.id = a.docente
-                INNER JOIN utente u2
-                ON u2.id = s.supplente
-                INNER JOIN ora o
-                ON o.id = s.ora
-                WHERE 1=1";
+        $sql = "SELECT s.id, CONCAT(u1.nome, ' ', u1.cognome) as assente, 
+        CONCAT(u2.nome, ' ', u2.cognome) as supplente, 
+        CONCAT(o.data_inizio, ' - ', o.data_fine) as ora, s.da_retribuire
+        FROM supplenza s
+        LEFT JOIN utente u1 ON u1.id = s.supplente
+        LEFT JOIN utente u2 ON u2.id = s.supplente
+        INNER JOIN ora o ON o.id = s.ora
+        UNION 
+        SELECT s.id, CONCAT(u1.nome, ' ', u1.cognome) as assente, 
+        CONCAT(u2.nome, ' ', u2.cognome) as supplente, 
+        CONCAT(o.data_inizio, ' - ', o.data_fine) as ora, s.da_retribuire
+        FROM supplenza s
+        LEFT JOIN utente u1 ON u1.id = s.supplente
+        LEFT JOIN utente u2 ON u2.id = s.supplente
+        INNER JOIN ora o ON o.id = s.ora
+        WHERE u1.id IS NULL OR u2.id IS NULL;";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
