@@ -36,9 +36,9 @@ class User extends Database
         $pwdLoginNormale = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo la presenza dell'id dell'utente nella tabella reset
-        $sql = "SELECT r.user_id AS id, r.expires, r.completed
+        $sql = "SELECT r.id_utente  AS id, r.data_scadenza, r.completato
                 FROM `reset` r
-                INNER JOIN utente u ON u.id = r.user_id
+                INNER JOIN utente u ON u.id = r.id_utente
                 WHERE u.email = :email AND r.`password` = :password";
         
         $stmt = $this->conn->prepare($sql);
@@ -49,7 +49,7 @@ class User extends Database
         $pwdLoginReset = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo che esista l'user_id, che la data dell'expires sia maggiore del giorno attuale e che la reset non sia completed
-        if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["expires"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completed"] == 0){
+        if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["data_scadenza"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completato"] == 0){
             return $pwdLoginReset["id"];
         }
 
@@ -82,6 +82,77 @@ class User extends Database
         {
             return 0;
         }
+    }
+
+    public function changePassword($userId, $oldPassword, $newPassword)
+    {
+        $sql = "update utente 
+                set utente.`password` = :newPassword
+                where utente.id = :userId and utente.`password` = :oldPassword;";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
+        $stmt->bindValue(":oldPassword", $oldPassword, PDO::PARAM_STR);
+        $stmt->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        if($stmt->rowCount()==1)
+        {
+            return $stmt->rowCount();
+        }else{
+            $sql2="UPDATE utente u
+            SET u.password = :newPassword
+            WHERE u.id = :userId
+            AND EXISTS (
+            SELECT * FROM reset r
+            WHERE r.id_utente = u.id
+            AND r.password = :oldPassword
+            AND r.completato  = 0
+            AND now()<r.data_scadenza
+            and now()>r.data_richiesta
+            )";
+            
+            $stmt2 = $this->conn->prepare($sql2);
+            $stmt2->bindValue(":userId", $userId, PDO::PARAM_INT);
+            $stmt2->bindValue(":oldPassword", $oldPassword, PDO::PARAM_STR);
+            $stmt2->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
+
+            $stmt2->execute();
+
+            if($stmt2->rowCount()==1)
+            {
+                $sql3="update reset 
+                set reset.completed=1
+                where reset.id_utente=:id_utente";
+            
+                $stmt3 = $this->conn->prepare($sql3);
+                $stmt3->bindValue(":userId", $userId, PDO::PARAM_INT);
+                $stmt3->bindValue(":oldPassword", $oldPassword, PDO::PARAM_STR);
+                $stmt3->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
+
+                $stmt3->execute();
+
+                return $stmt3->rowCount();
+            }
+        }
+    }
+
+    public function resetPassword($userId, $email)
+    {
+        $bytes = random_bytes(5); // 10 bytes will generate a string of length 20.
+        $password = bin2hex($bytes); // converts binary data to hexadecimal representation
+
+        $sql = "insert into reset(id_utente, `password`)
+                values (:userId, :password);";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
+        $stmt->bindValue(":password", $password, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
 }

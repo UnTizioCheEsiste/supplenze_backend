@@ -53,7 +53,7 @@ class UserController extends BaseController
 
                 $userData =
                     [
-                        "id" => $userId["id"],
+                        "id" => $userId,
                         "nome" => $userInfo["nome"],
                         "cognome" => $userInfo["cognome"],
                         "email" => $userInfo["email"],
@@ -66,16 +66,43 @@ class UserController extends BaseController
                 break;
                 
             case "register":
+                // BISOGNA GESTIRE L'INVIO DELLA EMAIL
+                $json = file_get_contents('php://input');
+                $data = json_decode($json);
+
+                if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
+                {
+                    //INVIO MAIL DA GESTIRE
+                    echo json_encode(["success" => true, "data" => "Email inviata correttamente."]);
+                }else{
+                    //messaggio errore
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione della registrazione"]);
+                }
+                break;
+
+            case "changePassword":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
                 echo json_encode($data);
-                if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
+                if($user->changePassword($data->idUtente, $data->passwordVecchia, $data->passwordNuova) == 1)
                 {
-                    //invio mail,
-                    echo "ciao";
+                    echo json_encode(["success" => true, "data" => "Password cambiata con successo."]);
                 }else{
                     //messaggio errore
-                    echo "errore";
+                    echo json_encode(["success" => false, "data" => "Errore nella modifica della password."]);
+                }
+                break;
+                
+            case "resetPassword":
+                $json = file_get_contents('php://input');
+                $data = json_decode($json);
+                if($user->resetPassword($data->idUtente, $data->email) == 1)
+                {
+                    echo json_encode(["success" => true, "data" => "Password temporanea creata con successo."]);
+                    //INVIO MAIL DA GESTIRE
+                }else{
+                //messaggio errore
+                    echo json_encode(["success" => false, "data" => "Errore nella modifica della password."]);
                 }
                 break;
         }
