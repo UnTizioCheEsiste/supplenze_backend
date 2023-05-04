@@ -9,6 +9,7 @@ header("Content-type: application/json; charset=UTF-8");
 set_exception_handler("errorHandler::handleException");
 set_error_handler("errorHandler::handleError");
 
+// Exploding url
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
