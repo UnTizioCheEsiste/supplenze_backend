@@ -20,19 +20,30 @@ class SubstitutionController extends BaseController
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
                 //$id_absence, $id_user, $not_necessary, $to_pay
+                //VARIABILI NECESSARIE
                 $id_absence = $data->assenza;
-                $id_user = $data->utente;
+                $id_user = $data->supplente;
                 $not_necessary = $data->non_necessaria;
                 $to_pay = $data->da_retribuire;
-                $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay);
+                $hour = $data->ora;
+                if(empty($id_absence) || empty($id_user) || empty($not_necessary) || empty($to_pay) || empty($hour)){
+                    //errore perche sono variabili necessarie 
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Le variabili necessarie non sono presenti"]);
+                    break;
+                }
+                //VARIABILI NON NECESSARIE
+                $substitution_date = $data->data_supplenza;
+                $note = $data->nota;
+                $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
 
-                if(!$newSubstitute){ //se ritorna TRUE
+                if(!$newSubstitute){ //se ritorna FALSE
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Operazione non completata"]);
                     break; 
                 }
                 http_response_code(200);
-                echo json_encode(["success" => true, "data" => $newSubstitute]); 
+                echo json_encode(["success" => true, "data" => "riga aggiunta con successo"]); 
                 break;
             // case "addSubtituteTeaching":
             //     break;

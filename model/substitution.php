@@ -3,17 +3,20 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 
 class Substitution extends Database
 {
-    public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay){ // da retribuire
+    public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note){ // da retribuire
         //L’api aggiunge il sostituto alla lezione. “non necessaria” serve per 
         //indicare se la lezione ha necessità di avere il supplente o meno
 
-        $sql = "INSERT INTO supplenza (assenza, supplente, non_necessaria, da_retribuire)
-                VALUES (:id_absence, :id_user, :not_necessary, :to_pay)";
+        $sql = "INSERT INTO supplenza (assenza, supplente, non_necessaria, da_retribuire, ora, data_supplenza, nota)
+                VALUES (:id_absence, :id_user, :not_necessary, :to_pay, :hourr, :substitution_date, :note)";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id_absence", $id_absence, PDO::PARAM_INT);
         $stmt->bindValue(":id_user", $id_user, PDO::PARAM_INT);
         $stmt->bindValue(":not_necessary", $not_necessary, PDO::PARAM_INT);
         $stmt->bindValue(":to_pay", $to_pay, PDO::PARAM_INT);
+        $stmt->bindValue(":hourr", $hour, PDO::PARAM_INT);
+        $stmt->bindValue(":substitution_date", $substitution_date, PDO::PARAM_STR);
+        $stmt->bindValue(":note", $note, PDO::PARAM_STR);
         if ($stmt->execute()) //se esegue allora si restituisce true per poi controllare la corretta esecuzione
         {
             return true;
