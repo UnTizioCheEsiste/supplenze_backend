@@ -2,7 +2,10 @@
 require_once __DIR__ . "/config/bootstrap.php";
 require_once __DIR__ . "/config/errorHandler.php";
 
+// Header
 header("Content-type: application/json; charset=UTF-8");
+
+// Error handler
 set_exception_handler("errorHandler::handleException");
 set_error_handler("errorHandler::handleError");
 
