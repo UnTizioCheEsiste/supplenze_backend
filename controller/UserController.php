@@ -18,7 +18,13 @@ class UserController extends BaseController
         switch ($this->uri) {
             case "getUser":
                 $params = $this->getQueryStringParams();
-                $userInfo = $user->getUser($params['id']);
+                if(empty($params["id"]))
+                {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                    break;
+                }else{
+                    $userInfo = $user->getUser($params['id']);
 
                 if (empty($userInfo)) {
                     http_response_code(404);
@@ -29,7 +35,7 @@ class UserController extends BaseController
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $userInfo]);
                 break;
-
+                }
             case "login":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
@@ -118,9 +124,27 @@ class UserController extends BaseController
                 echo json_encode(["success" => true, "data" => $userInfo]);
                 break;
             
-            case "Get Archive User Absence":
+            case "GetArchiveUserAbsence":
+                $params = $this->getQueryStringParams();
+                if(!empty($params["id"]))
+                {
+                    $userInfo = $user->GetArchiveUserAbsence($params['id']);
+
+                    if (empty($userInfo)) {
+                        http_response_code(404);
+                        echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                        break;
+                    }
+    
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $userInfo]);
+                    break;
+                }else{
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Id non inserito"]);
+                    break;
+                }
                 break;
-            
         }
     }
 }

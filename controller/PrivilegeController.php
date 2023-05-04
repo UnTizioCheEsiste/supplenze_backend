@@ -17,7 +17,15 @@ class PrivilegeController extends BaseController
 
         if ($this->uri == "getArchivePrivilege")
         {
-            
+            $privileges = $privilege->getArchivePrivilege();
+                
+            if (empty($privileges)) {
+                http_response_code(404);
+                echo json_encode(["success" => false, "data" => "Errore nella restituzione privilegi"]);
+            }
+
+            http_response_code(200);
+            echo json_encode(["success" => true, "data" => $privileges]);
         }
     }
 }

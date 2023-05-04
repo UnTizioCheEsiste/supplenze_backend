@@ -17,12 +17,16 @@ class BankController extends BaseController
 
         switch ($this->uri) {
             case "getArchiveCountHoursBank":
+
                 break;
             case "getUserHoursBank":
+
                 break;
             case "getUserCountHoursBank":
+
                 break;
             case "addUserHoursBank":
+                
                 break;
         }
     }

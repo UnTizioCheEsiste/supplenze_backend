@@ -170,6 +170,15 @@ class User extends Database
 
     public function GetArchiveUserAbsence($id)
     {
+        $sql = "SELECT concat(u.nome,' ',u.cognome) as utente,m.nome,a.certificato_medico,a.data_inizio,a.data_fine,a.nota
+        FROM assenza a 
+        inner join utente u on u.id=a.docente
+        inner join motivazione m on m.id=a.motivazione
+        WHERE u.id=:id";
 
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

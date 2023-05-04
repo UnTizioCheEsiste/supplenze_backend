@@ -48,7 +48,7 @@ class SubstitutionController extends BaseController
                 break;
             case "getArchiveUserSubstitution":
                 $params = $this->getQueryStringParams();
-                if(!empty($params))
+                if(!empty($params["id"]))
                 {
                     $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
                     if(empty($archiveUserSub)){
