@@ -40,6 +40,9 @@ class AvailabilityController extends BaseController
 
                 break;
             case "addAvailability":
+                $json = file_get_contents('php://input');
+                $data = json_decode($json);
+
                 
                 break;
             case "removeAvailability":

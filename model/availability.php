@@ -72,6 +72,4 @@ class Availability extends Database
         return false;
     }
 
-
-
 }
