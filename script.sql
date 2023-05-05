@@ -86,6 +86,7 @@ create table dbmuybgxgpjqvi.banca_ore(
 	tipo_ora nvarchar(15) not null,
 	docente int not null,
 	numero_ore int not null,
+	giorno date not null,
 	nota nvarchar(300),
 	foreign key (docente) references utente(id)
 );
@@ -157,10 +158,10 @@ values (1, 1, '2024-04-20', null, null, true, "la classe 5E entra alle 9:30"),
 (3, 2, '2028-04-20', 1, false, false, null);
 
 
-insert into dbmuybgxgpjqvi.banca_ore (tipo_ora, docente, numero_ore, nota)
-values ("da recuperare", 1, 2, "da recuperare possibilmente entro il 24 maggio"),
-("straordinario", 7, 3, "lezioni al serale del 14 aprile 2023"),
-("da recuperare", 8, 5, null);
+insert into dbmuybgxgpjqvi.banca_ore (tipo_ora, docente, numero_ore, giorno, nota)
+values ("da recuperare", 1, 2, "2001-12-02", "da recuperare possibilmente entro il 24 maggio"),
+("straordinario", 7, 3, "2002-04-22", "lezioni al serale del 14 aprile 2023"),
+("da recuperare", 8, 5, "2023-12-31", null);
 
 insert into dbmuybgxgpjqvi.reset (id_utente, `password`, data_richiesta, completato)
 values (1, "ABCDE", "2024-04-20 8:00:00", false),
