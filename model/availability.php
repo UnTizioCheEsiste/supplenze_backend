@@ -31,6 +31,7 @@ class Availability extends Database
                 where g.nome = :week_day";
 
         if (DateTime::createFromFormat('Y-m-d H:i:s', $date) !== false) {
+            echo $date;
             $stmt = $this->conn->prepare($sql1);
             $stmt->bindValue(":date_hour", $date, PDO::PARAM_STR);
         } else {
