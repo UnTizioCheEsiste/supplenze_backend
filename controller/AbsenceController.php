@@ -17,6 +17,7 @@ class AbsenceController extends BaseController
 
         switch ($this->uri) {
             case "getArchiveAbsence":
+                $absence->getArchiveAbsence();
                 break;
             case "getAbsence":
                 break;
