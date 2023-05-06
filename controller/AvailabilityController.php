@@ -17,15 +17,17 @@ class AvailabilityController extends BaseController
 
         switch ($this->uri) {
             case "getArchiveAvailability":
+                break;
+            case "getArchiveAvailabilityHour":
                 $params = $this->getQueryStringParams();
                 if(empty($params["data"])){
                     http_response_code(200);
                     echo json_encode(["success" => false, "data" => "Non è specificata la data"]);
                     break;
                 } else if (strtotime($params["data"])) { // se è una data
-                    $archiveAva = $ava->getArchiveAvailability($params["data"], true);
+                    $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], true);
                 } else if(is_string($params["data"])){ // se è un giorno della settimana
-                    $archiveAva = $ava->getArchiveAvailability($params["data"], false);
+                    $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], false);
                 }
 
                 if(empty($archiveAva)){
@@ -35,9 +37,6 @@ class AvailabilityController extends BaseController
                 }
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $archiveAva]);
-                break;
-            case "getArchiveAvailabilityHour":
-
                 break;
             case "addAvailability":
                 $json = file_get_contents('php://input');
