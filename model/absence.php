@@ -3,9 +3,10 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 
 class Absence extends Database
 {
-    public function getArchiveAbsence() {
+    public function getArchiveAbsence()
+    {
         // Get delle assenze dei docenti
-        $sql = "SELECT a.id,a.data_inizio, a.data_fine, u.nome, u.cognome, a.certificato_medico, a.motivazione
+        $sql = "SELECT a.id,a.data_inizio, a.data_fine, concat(u.nome,' ',u.cognome) as docente, a.certificato_medico, a.motivazione, a.nota
                 FROM assenza a
                 INNER JOIN utente u ON u.id = a.docente
                 WHERE 1=1";
@@ -15,7 +16,6 @@ class Absence extends Database
 
 
         $absences = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
         // Get delle supplenze
         $sql = "SELECT id,assenza
@@ -29,26 +29,10 @@ class Absence extends Database
 
         // Array associativo con tutte le informazioni necessarie
         $users = array();
+    }
+}
 
-
-        // Copertura assenza
-        $coperta = false;
-
-        //provo con contains
-        foreach ($absences as $assenza) {
-            $idAssenza = $assenza['id'];
-          
-            // Controlla se l'ID dell'assenza è presente tra le supplenze
-            foreach ($substitutions as $supplenza) {
-              $idSupplenza = $supplenza['assenza'];
-          
-              if ($idAssenza == $idSupplenza) {
-                // L'assenza è stata coperta, elabora l'informazione
-                // ...
-                
-              }
-            }
-        // Controllo se l'assenza del docente è stata coperta da una supplenza
+// Controllo se l'assenza del docente è stata coperta da una supplenza
         /*foreach ($absences as $obj1) {
             foreach ($substitutions as $obj2) {
 
@@ -90,8 +74,3 @@ class Absence extends Database
                 array_push($users, $temp);
             }
         }*/
-        echo json_encode($users);
-        return $users;
-    }
-
-}
