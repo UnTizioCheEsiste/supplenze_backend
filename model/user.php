@@ -6,6 +6,8 @@ class User extends Database
     /**
      * Ottieni gli elementi del URI.
      * 
+     * @param int $userId ID dell'utente.
+     * 
      * @return User
      */
     public function getUser($userId)
@@ -21,6 +23,14 @@ class User extends Database
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Login dell'utente.
+     * 
+     * @param string $email Email dell'utente.
+     * @param string $password Password dell'utente.
+     * 
+     * @return int Id dell'utente loggato.
+     */
     public function login($email, $password)
     {
         // Controllo le credenziali dell'utente
@@ -56,10 +66,20 @@ class User extends Database
         return $pwdLoginNormale["id"];
     }
 
+    /**
+     * Registra l'utente.
+     * 
+     * @param string $nome Nome dell'utente.
+     * @param string $cognome Cognome dell'utente.
+     * @param string $email Email dell'utente.
+     * @param string $telefono Numero di telefono dell'utente.
+     * @param int $privilegio Il tipo di privilegio che l'utente avrà.
+     */
     public function register($nome, $cognome, $email, $telefono, $privilegio)
     {
-        $bytes = random_bytes(5); // 10 bytes will generate a string of length 20.
-        $password = bin2hex($bytes); // converts binary data to hexadecimal representation
+        // Generazione di una password casuale
+        $bytes = random_bytes(5);
+        $password = bin2hex($bytes);
 
 
         $sql = "insert into utente  (nome, cognome, email, `password` , telefono, privilegio)
@@ -84,6 +104,13 @@ class User extends Database
         }
     }
 
+    /**
+     * Cambia password.
+     * 
+     * @param int $userId ID dell'utente.
+     * @param string $oldPassword Vecchia password dell'utente.
+     * @param string $newPassword Nuova password dell'utente.
+     */
     public function changePassword($userId, $oldPassword, $newPassword)
     {
         $sql = "update utente 
