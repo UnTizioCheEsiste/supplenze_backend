@@ -35,7 +35,7 @@ class Absence extends Database
     /**
      * Divide l'assenza in supplenze da coprire.
      * 
-     * @param int id ID dell'assenza.
+     * @param int $id ID dell'assenza.
      * @return mixed supplenze singole e giorno.
      */
     public function ungroupAbsence($id) 
@@ -96,47 +96,45 @@ class Absence extends Database
         {/* Assenza giorni multipli */}
 
     }
+
+    /**
+     * Aggiunge assenze alla tabella "assenza"
+     * 
+     * @param int $userId ID dell'utente.
+     * @param string[] $hours Ore/a di assenza.
+     * @param string $certificate_code Codice del certificato medico.
+     * @param string $notes Note inerenti all'assenza.
+     * @param int $reason Motivo dell'assenza.
+     * 
+     * @return boolean
+     */
+    public function addAbsenceHour($userId, $hours, $certificate_code, $notes, $reason) 
+    {
+        if (count($hours) === 1) 
+        {
+            // Divisione data da ora
+            $absence_date = explode(" ", $hours[0]);
+
+            // Ora inizio assenza
+            $ora_inizio = $absence_date[1];
+
+            // <!> Come faccio a capire se l'ora è formata da 30min o da 1h? <!>
+
+            // Insert dell'assenza
+            $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
+            VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
+    
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+            $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
+            $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
+            $stmt->bindValue(':data_inizio', $ora_inizio, PDO::PARAM_STR);
+            $stmt->bindValue(':data_fine', /*<!> $ora_fine <!>*/, PDO::PARAM_STR);
+            $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
+
+            return $stmt->execute();
+        }
+
+        return false;
+    }
 }
-
-// Controllo se l'assenza del docente è stata coperta da una supplenza
-        /*foreach ($absences as $obj1) {
-            foreach ($substitutions as $obj2) {
-
-
-                // Da controllare il suo comportamento da array anche se è un oggetto
-                echo json_encode($obj1);
-                // Se l'assenza è coperta
-                if ($obj1["id"] === $obj2["assenza"]) {
-                    $coperta = true;
-                    break;
-                } else {
-                    $coperta = false;
-                }
-
-
-                $temp = new class ($coperta, $obj1){
-                    public $nome;
-                    public $cognome;
-                    public $data_inizio;
-                    public $data_fine;
-                    public $motivazione;
-                    public $certificato_medico;
-                    public $supplenza;
-
-
-                    public function __construct($coperta, $obj) {
-                        $this->supplenza = $coperta;
-                        $nome = $obj["nome"];
-                        $cognome = $obj["cognome"];
-                        $data_inizio = $obj["data_inizio"];
-                        $data_fine = $obj["data_fine"];
-                        $motivazione = $obj["motivazione"];
-                        $certificato_medico = $obj["certificato_medico"];
-                    }
-                };
-
-
-                //echo json_encode($temp);
-                array_push($users, $temp);
-            }
-        }*/

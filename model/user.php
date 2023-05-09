@@ -8,14 +8,14 @@ class User extends Database
      * 
      * @return User
      */
-    public function getUser($id)
+    public function getUser($userId)
     {
         $sql = "SELECT nome, cognome, email, privilegio, telefono
                 FROM utente
                 WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        $stmt->bindValue(":id", $userId, PDO::PARAM_INT);
 
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
