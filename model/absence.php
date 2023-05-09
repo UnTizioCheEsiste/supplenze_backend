@@ -98,27 +98,29 @@ class Absence extends Database
     }
 
     /**
-     * Aggiunge assenze alla tabella "assenza"
+     * Aggiunge assenze alla tabella "assenza".
      * 
      * @param int $userId ID dell'utente.
-     * @param string[] $hours Ore/a di assenza.
+     * @param string $date Data dell'assenza.
+     * @param int[] $hours ID delle/a Ore/a di assenza.
      * @param string $certificate_code Codice del certificato medico.
      * @param string $notes Note inerenti all'assenza.
      * @param int $reason Motivo dell'assenza.
      * 
      * @return boolean
      */
-    public function addAbsenceHour($userId, $hours, $certificate_code, $notes, $reason) 
+    public function addAbsenceHour($userId, $date, $hours, $certificate_code, $notes, $reason)
     {
+        $time = new Time();
+
         if (count($hours) === 1) 
         {
-            // Divisione data da ora
-            $absence_date = explode(" ", $hours[0]);
-
             // Ora inizio assenza
-            $ora_inizio = $absence_date[1];
+            $hour = $time->getHourById($hours[0]);
 
-            // <!> Come faccio a capire se l'ora è formata da 30min o da 1h? <!>
+            // Concatenzione giorno e ora
+            $data_inizio = $date . " " . $hour["data_inizio"];
+            $data_fine = $date . " " . $hour["data_fine"];
 
             // Insert dell'assenza
             $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
@@ -128,13 +130,127 @@ class Absence extends Database
             $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
             $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
             $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
-            $stmt->bindValue(':data_inizio', $ora_inizio, PDO::PARAM_STR);
-            $stmt->bindValue(':data_fine', /*<!> $ora_fine <!>*/, PDO::PARAM_STR);
+            $stmt->bindValue(':data_inizio', $data_inizio, PDO::PARAM_STR);
+            $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
             $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
             return $stmt->execute();
-        }
+        } 
+        else 
+        {
+            // Variabile per il controllo del corretto inserimento
+            $insertCounter = 0;
 
-        return false;
+            // Ciclo per le ore di assenza
+            foreach ($hours as $h) 
+            {
+                // Ora inizio assenza
+                $hour = $time->getHourById($h);
+
+                // Concatenzione giorno e ora
+                $data_inizio = $date . " " . $hour["data_inizio"];
+                $data_fine = $date . " " . $hour["data_fine"];
+
+                // Insert dell'assenza
+                $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
+                VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
+    
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+                $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
+                $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
+                $stmt->bindValue(':data_inizio', $data_inizio, PDO::PARAM_STR);
+                $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
+                $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
+
+                $stmt->execute() ? $insertCounter++ : null;
+            }
+
+            // Se tutte le ore sono state aggiunte come assenze
+            return count($hours) === $insertCounter;
+        }
+    }
+
+    /**
+     * Aggiunge una assenza giornaliera alla tabella "assenza".
+     * 
+     * @param int $userId ID dell'utente.
+     * @param string $date Data dell'assenza.
+     * @param string $certificate_code Codice del certificato medico.
+     * @param string $notes Note inerenti all'assenza.
+     * @param int $reason Motivo dell'assenza.
+     * 
+     * @return boolean
+     */
+    public function addAbsenceSingleDay($userId, $date, $certificate_code, $notes, $reason) 
+    {
+        $data_inizio = $date . " 08:00:00";
+        $data_fine = $date . " 13:30:00";
+
+        // Insert dell'assenza
+        $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
+        VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
+        $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
+        $stmt->bindValue(':data_inizio', $data_inizio, PDO::PARAM_STR);
+        $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
+        $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Aggiunge un insieme di giornidi assenza alla tabella "assenza".
+     * 
+     * @param int $userId ID dell'utente.
+     * @param string[] $dates Giorni di assenza.
+     * @param string $certificate_code Codice del certificato medico.
+     * @param string $notes Note inerenti all'assenza.
+     * @param int $reason Motivo dell'assenza.
+     * 
+     * @return boolean
+     */
+    public function addAbsenceMultipleDay($userId, $dates, $certificate_code, $notes, $reason) 
+    {
+        $data_inizio = $dates[0] . " 08:00:00";
+        $data_fine = $dates[count($dates) - 1] . " 13:30:00";
+
+        // Insert dell'assenza
+        $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
+        VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
+        $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
+        $stmt->bindValue(':data_inizio', $data_inizio, PDO::PARAM_STR);
+        $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
+        $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
+
+        return $stmt->execute();    
+    }
+
+    /**
+     * Aggiunge un certificato medico ad una assenza già presente.
+     * 
+     * @param int $id ID assenza.
+     * @param string $certificate_code Codice del certificato medico.
+     * 
+     * @return boolean
+     */
+    public function addCertificate($id, $certificate_code)
+    {
+        $sql = "UPDATE assenza
+                SET certificato_medico = :certificato
+                WHERE id = :id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':certificato', $certificate_code, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
     }
 }

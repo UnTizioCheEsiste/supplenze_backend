@@ -32,15 +32,19 @@ class SubstitutionController extends BaseController
                 $to_pay = $data->da_retribuire;
                 $hour = $data->ora;
 
-                //VARIABILI NON NECESSARIE
-                $substitution_date = $data->data_supplenza;
-                $note = $data->nota;
-
-                if (empty($substitution_date) || empty($note)) { //se sono null le devo convertire in stringhe vuote
+                if (empty($data->data_supplenza)) {
                     $substitution_date = "";
-                    $note = "";
-
                 }
+
+                if (empty($data->nota)) {
+                    $note = "";
+                }
+                
+                if (!empty($data->data_supplenza) && !empty($data->nota)) {
+                    $substitution_date = $data->data_supplenza;
+                    $note = $data->nota;
+                }
+                
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
 
                 if (!$newSubstitute) { //se ritorna FALSE

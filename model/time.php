@@ -5,7 +5,7 @@ class Time extends Database
 {
     public function getHour() 
     {
-        $sql = "SELECT id, start_time, finish_time
+        $sql = "SELECT id, data_inizio, data_fine
                 FROM ora
                 WHERE 1=1";
         
@@ -27,5 +27,19 @@ class Time extends Database
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getHourById($id) 
+    {
+        $sql = "SELECT data_inizio, data_fine
+                FROM ora
+                WHERE id = :id";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
