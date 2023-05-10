@@ -55,9 +55,12 @@ class Availability extends Database
 
         //BISOGNA CONTROLLARE LA DATA, MA BISOGNA FARE UNA QUERY A PARTE
     }
-    
+
+    // Aggiunge una nuova disponibilita nella tabella disponibilita
     public function addAvailability($teacher, $availability_type, $type1, $type2, $is_date){
 
+        //type1 può essere data_inizio o giorno
+        //type2 può essere data_fine e ora
         $sql1 = "SELECT INTO disponibilita (docente, tipo_disponibilita, data_inizio, data_fine)
                 VALUES (:teacher, :availability_type, :type1, :type2)";
         $sql2 = "INSERT INTO disponibilita (docente, tipo_disponibilita, giorno, ora)
@@ -79,6 +82,27 @@ class Availability extends Database
             return true;
         }
         return false;
+    }
+
+    // Rimuove la disponibilita dato il suo ID
+    public function removeAvailability($availability_id){
+        $sql = "DELETE FROM disponibilita
+                WHERE id = :availability_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":availability_id", $availability_id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    // Mostra la lista dei tipi di disponibilita dalla tabella tipo_disponibilita
+    public function getArchiveTypeAvailability(){
+
+        $sql = "SELECT id, nome, descrizione
+                FROM tipo_disponibilita
+                WHERE 1=1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
     }
 
 }

@@ -32,6 +32,7 @@ class SubstitutionController extends BaseController
                 $to_pay = $data->da_retribuire;
                 $hour = $data->ora;
 
+                // Se non hanno un valore do una stringa vuota
                 if (empty($data->data_supplenza)) {
                     $substitution_date = "";
                 }
@@ -40,6 +41,7 @@ class SubstitutionController extends BaseController
                     $note = "";
                 }
                 
+                // Se hanno un valore li assegno
                 if (!empty($data->data_supplenza) && !empty($data->nota)) {
                     $substitution_date = $data->data_supplenza;
                     $note = $data->nota;
