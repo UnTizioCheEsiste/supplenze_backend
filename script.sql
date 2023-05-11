@@ -1,9 +1,3 @@
-create database dbmuybgxgpjqvi;
-
-create table dbmuybgxgpjqvi.privilegio (
-	id int auto_increment primary key,
-	nome nvarchar(30) not null
-);
 create table dbmuybgxgpjqvi.utente (
 	id int auto_increment primary key,
 	nome nvarchar(30) not null,
@@ -121,7 +115,8 @@ values ("lunedi"), ("martedi"), ("mercoledi"), ("giovedi"), ("venerdi"), ("sabat
 
 
 insert into dbmuybgxgpjqvi.ora (id, data_inizio, data_fine)
-values (1, "8:00", "9:30"), (2, "9:30", "10:30"), (3, "10:30", "11:30"), (4, "11:30", "12:30"), (5, "12:30", "13:30");
+values (1, "8:00", "9:30"), (2, "9:30", "10:30"), (3, "10:30", "11:30"), (4, "11:30", "12:30"), (5, "12:30", "13:30"),
+(6, "08:00", "08:30"),(7, "08:00", "09:00"),(8, "09:00", "09:30");
 
 
 insert into dbmuybgxgpjqvi.motivazione (nome)

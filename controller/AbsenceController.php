@@ -144,11 +144,15 @@ class AbsenceController extends BaseController
                 if (empty($data->certificate_code)) 
                 {
                     $certificate = "";
+                }else{
+                    $certificate = $data->certificate_code;
                 }
                 
                 // Controllo sulla presenza del campo opzionale note
                 if (empty($data->notes)) {
                     $notes = "";
+                }else{
+                    $notes = $data->notes;
                 }
 
                 // Controllo sulla presenza dei campi obbligatori
@@ -156,12 +160,6 @@ class AbsenceController extends BaseController
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
-                }
-
-                // Nel caso esistessero i due campi opzionali
-                if (!empty($data->certificate_code) && !empty($data->notes)) {
-                    $notes = $data->notes;
-                    $certificate = $data->certificate_code;
                 }
 
                 // Aggiunta della/e assenza/e
