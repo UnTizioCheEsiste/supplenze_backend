@@ -1,5 +1,6 @@
 <?php
 require_once PROJECT_ROOT_PATH . "/model/database.php";
+require_once PROJECT_ROOT_PATH . "/model/time.php";
 
 class Availability extends Database
 {
@@ -27,46 +28,38 @@ class Availability extends Database
     }
 
     //Mostra la lista dei supplenti disponibili per quel determinato giorno e quella determinata ora
-    public function getArchiveAvailabilityHour($date, $hour)
+    public function getArchiveAvailabilityHour($date, $hourID)
     {
-        $sql = "SELECT 
-                FROM
-                WHERE";
+        /* Mi prendo il valore dell'ID dell'ora */
+        // $class = new Time();
+        // $hour = $class->getHourById($hourID);
 
+        /* Trovo i docenti con disponibilita temporanea che sono liberi quel determinato giorno
+         * a quella determinata ora*/
+        $sql1 = "SELECT d.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita 
+        from disponibilita d 
+        inner join utente u 
+        on u.id = d.docente
+        inner join tipo_disponibilita td 
+        on td.id = d.tipo_disponibilita 
+        where :datee between d.data_inizio and d.data_fine";
 
+        $stmt1 = $this->conn->prepare($sql1);
+        $stmt1->bindValue(":datee", $date, PDO::PARAM_STR);
+        $stmt1->execute();
+        $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
-        //         /* Mi prendo il valore dell'ID dell'ora */
-// select  
-// from ora o 
-// where o.id = 1;
-
-        // /* Trovo i docenti con disponibilita temporanea che sono liberi quel determinato giorno
-//  * a quella determinata ora*/
-// select d.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita 
-// from disponibilita d 
-// inner join utente u 
-// on u.id = d.docente
-// inner join tipo_disponibilita td 
-// on td.id = d.tipo_disponibilita 
-// where "2026-04-20 9:30:00" between d.data_inizio and d.data_fine;
-
-        // /* Trovo i docenti con disponibilita permanente che sono liberi quel giorno della settimana
-//  * a quell'ora di lezione */
-// select 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        /* Trovo i docenti con disponibilita permanente che sono liberi quel giorno della settimana
+         * a quell'ora di lezione */
+        $sql3 = "SELECT d.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita
+        from disponibilita d 
+        inner join utente u 
+        on u.id = d.docente
+        inner join tipo_disponibilita td 
+        on td.id = d.tipo_disponibilita 
+        inner join giorno g 
+        on g.id = d.giorno
+        where d.ora";
 
         // Da controllare la presenza del possibile supplente
         //data inizio e data fine possono essere sia date normali (data+ora) oppure giorni (lunedi, martedi) 
