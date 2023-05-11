@@ -4,6 +4,9 @@ require_once PROJECT_ROOT_PATH . "/model/time.php";
 
 class Absence extends Database
 {
+    /**
+     * Ottiene la lista delle assenze (non ottiene se sono state coperte oppure no perchè questo sarà nello storico supplenze)
+     */
     public function getArchiveAbsence()
     {
         // Get delle assenze dei docenti
@@ -17,20 +20,41 @@ class Absence extends Database
 
 
         $absences = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $absences;
 
-        // Get delle supplenze
+        /* Get delle supplenze
         $sql = "SELECT id,assenza
                 FROM supplenza
                 WHERE 1 = 1";
        
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $substitutions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-        // Array associativo con tutte le informazioni necessarie
-        $users = array();
+        $substitutions = $stmt->fetchAll(PDO::FETCH_ASSOC);*/
     }
+
+    /**
+     * Ottiene la singola assenza dall'id
+     * 
+     * @param int $id ID dell'assenza.
+     */
+
+    public function getAbsence($id)
+    {
+        // Get delle assenze dei docenti
+        $sql = "SELECT a.id,a.data_inizio, a.data_fine, concat(u.nome,' ',u.cognome) as docente, a.certificato_medico, a.motivazione, a.nota
+                FROM assenza a
+                INNER JOIN utente u ON u.id = a.docente
+                WHERE u.id=:id";
+       
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
 
     /**
      * Divide l'assenza in supplenze da coprire.
