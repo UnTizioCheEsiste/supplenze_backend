@@ -90,12 +90,44 @@ class Absence extends Database
             $stmt->bindValue(':assenza', $id, PDO::PARAM_INT);
             $stmt->bindValue(':ora', $hourId, PDO::PARAM_STR);
             $stmt->bindValue(':data_supplenza', $data_inizio[0], PDO::PARAM_STR);
-            $stmt->execute();
+            $exc=$stmt->execute();
+            
+            if(!$exc) return false;
         }
         else 
         {
             //fcreare un array con i giorni dalla data di inizio alla data di fine
             //ciclo dove cicli i giorni e poi cicli le ore (nested) in cui fai insert into supplenze 
+            $current_date=strtotime($data_inizio[0]);
+            $last_date=strtotime($data_fine[0]);
+
+            $date_array=array();
+            while($current_date<=$last_date){
+                $date_array[]=date('Y-m-d',$current_date);
+                $current_date=strtotime("+1 day",$current_date);
+            }
+
+            $insertCounter=0;
+            foreach($date_array as $day)
+            {
+                foreach($hours as $hour)
+                {
+                    $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
+                    VALUES (:assenza, :ora, :data_supplenza)";
+                
+                    $stmt = $this->conn->prepare($sql);
+                    $stmt->bindValue(':assenza', $id, PDO::PARAM_INT);
+                    $stmt->bindValue(':ora', $hour["id"], PDO::PARAM_STR);
+                    $stmt->bindValue(':data_supplenza', $day, PDO::PARAM_STR);
+
+                    $exc = $stmt->execute();
+                    $exc ? $insertCounter++ : null;
+
+                    if (!$exc) return false;
+                }
+                $insertCounter++;
+            }
+            return count($hours) + count($date_array) === $insertCounter;
         }
 
     }
@@ -151,6 +183,8 @@ class Absence extends Database
             $st->bindValue('data_supplenza', $date, PDO::PARAM_STR);
 
             return $exc && $st->execute();
+
+
         } 
         else 
         {
