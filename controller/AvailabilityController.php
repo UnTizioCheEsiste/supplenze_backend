@@ -17,33 +17,39 @@ class AvailabilityController extends BaseController
 
         switch ($this->uri) {
             case "getArchiveAvailability":
-                break;
-            case "getArchiveAvailabilityHour":
-                $params = $this->getQueryStringParams();
-                if (empty($params["data"])) {
-                    http_response_code(200);
-                    echo json_encode(["success" => false, "data" => "Non è specificata la data"]);
-                    break;
-                } else if (strtotime($params["data"])) { // se è una data
-                    $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], true);
-                } else if (is_string($params["data"])) { // se è un giorno della settimana
-                    $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], false);
-                }
-
-                if (empty($archiveAva)) {
+                $archiveAva = $ava->getArchiveAvailability();
+                if(empty($archiveAva)){
                     http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non è presente alcuna disponibilità"]);
-                    break;
+                    echo json_encode(["success" => false, "data" => "Non è presente alcun dato"]);
                 }
                 http_response_code(200);
-                echo json_encode(["success" => true, "data" => $archiveAva]);
+                    echo json_encode(["success" => true, "data" => $archiveAva]);
                 break;
+            case "getArchiveAvailabilityHour":
+                // $params = $this->getQueryStringParams();
+                // if (empty($params["data"])) {
+                //     http_response_code(500);
+                //     echo json_encode(["success" => false, "data" => "Non è specificata la data"]);
+                //     break;
+                // } else if (strtotime($params["data"])) { // se è una data
+                //     $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], true);
+                // } else if (is_string($params["data"])) { // se è un giorno della settimana
+                //     $archiveAva = $ava->getArchiveAvailabilityHour($params["data"], false);
+                // }
+
+                // if (empty($archiveAva)) {
+                //     http_response_code(500);
+                //     echo json_encode(["success" => false, "data" => "Non è presente alcuna disponibilità"]);
+                //     break;
+                // }
+                // http_response_code(200);
+                // echo json_encode(["success" => true, "data" => $archiveAva]);
+                // break;
             case "addAvailability":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
 
                 // Controllo variabili
-                // $teacher, $availability_type, $type1, $type2, $is_date
                 if (empty($data->docente) || empty($data->disponibilita)) {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "I dati hanno un formato errato"]);
