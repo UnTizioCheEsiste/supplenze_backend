@@ -24,7 +24,7 @@ class AbsenceController extends BaseController
                 //controllo sul valore restituito
                 if (empty($absences)) {
                     http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                    echo json_encode(["success" => false, "data" => "Assenze non presenti"]);
                     break;
                 }
 
@@ -47,7 +47,7 @@ class AbsenceController extends BaseController
 
                     if (empty($absenceInfo)) {
                         http_response_code(404);
-                        echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                        echo json_encode(["success" => false, "data" => "Assenza non trovata"]);
                         break;
                     }
 
@@ -55,7 +55,6 @@ class AbsenceController extends BaseController
                     echo json_encode(["success" => true, "data" => $absenceInfo]);
                     break;
                 }
-                break;
             case "addCertificate":
                 //ottengo gli input e assegno a delle variabili i vari parametri del body
                 $json = file_get_contents('php://input');
@@ -72,6 +71,12 @@ class AbsenceController extends BaseController
                 $absenceId = $data->absenceId;
                 $certificate = $data->certificate_code;
 
+                if(empty($absence->getAbsence($absenceId)))
+                {
+                    http_response_code(401);
+                    echo json_encode(["success" => false, "data" => "Assenza inesistente"]);
+                    break;
+                }
                 //richaimo la query nel model che restituisce true o false
                 $result = $absence->addCertificate($absenceId, $certificate);
 
@@ -182,6 +187,13 @@ class AbsenceController extends BaseController
                 if (empty($data->userId) || empty($data->dates) || empty($data->reason)) {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
+                    break;
+                }
+
+                if($data->dates[0]>($data->dates[count($data->dates)-1]))
+                {
+                    http_response_code();
+                    echo json_encode(["success" => false, "data" => "Date errate"]);
                     break;
                 }
 

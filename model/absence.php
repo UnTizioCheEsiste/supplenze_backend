@@ -6,6 +6,7 @@ class Absence extends Database
 {
     /**
      * Ottiene la lista delle assenze (non ottiene se sono state coperte oppure no perchè questo sarà nello storico supplenze)
+     * @return mixed lista di assenze
      */
     public function getArchiveAbsence()
     {
@@ -44,7 +45,7 @@ class Absence extends Database
         $sql = "SELECT a.id,a.data_inizio, a.data_fine, concat(u.nome,' ',u.cognome) as docente, a.certificato_medico, a.motivazione, a.nota
                 FROM assenza a
                 INNER JOIN utente u ON u.id = a.docente
-                WHERE u.id=:id";
+                WHERE a.id=:id";
        
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -62,7 +63,7 @@ class Absence extends Database
      * @param int $id ID dell'assenza.
      * @return mixed supplenze singole e giorno.
      */
-    public function ungroupAbsence($id)
+    public function devideAbsence($id)
     {
         // Get dell'assenza
         $sql = "SELECT *
@@ -205,7 +206,7 @@ class Absence extends Database
 
             $st = $this->conn->prepare($sql);
             $st->bindValue(':id', $this->conn->lastInsertId(), PDO::PARAM_INT);
-            $st->bindValue(':ora', $hour, PDO::PARAM_STR);
+            $st->bindValue(':ora', $hours[0], PDO::PARAM_INT);
             $st->bindValue('data_supplenza', $date, PDO::PARAM_STR);
 
             return $exc && $st->execute();//true se entrambe le query sono andate a buon fine
@@ -248,7 +249,7 @@ class Absence extends Database
 
                 $st = $this->conn->prepare($sql);
                 $st->bindValue(':id', $this->conn->lastInsertId(), PDO::PARAM_INT);
-                $st->bindValue(':ora', $hour, PDO::PARAM_STR);
+                $st->bindValue(':ora', $hours[0], PDO::PARAM_INT);
                 $st->bindValue('data_supplenza', $date, PDO::PARAM_STR);
 
                 $st->execute();
@@ -287,7 +288,9 @@ class Absence extends Database
         $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
         $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
-        return $stmt->execute();
+        $result = $stmt->execute();
+        $this->devideAbsence($this->conn->lastInsertId());
+        return $result;
     }
 
     /**
@@ -318,7 +321,9 @@ class Absence extends Database
         $stmt->bindValue(':data_fine', $data_fine, PDO::PARAM_STR);
         $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
-        return $stmt->execute();    
+        $result = $stmt->execute();
+        $this->devideAbsence($this->conn->lastInsertId());
+        return $result;  
     }
 
     /**
@@ -340,5 +345,26 @@ class Absence extends Database
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         return $stmt->execute();
+    }
+
+    /**
+     * Visualizza le supplenze relative ad una assenza
+     * @param int $id l'id dell'assenza 
+     * @return mixed lista delle assenze con relativo supplente che le ha coperte 
+     */
+    public function ungroupAbsence($id)
+    {
+        $sql = "SELECT s.id, o.data_inizio as ora_inizio, o.data_fine as ora_fine, s.data_supplenza, s.supplente, s.da_retribuire, s.non_necessaria, s.nota
+        FROM supplenza s
+        LEFT JOIN utente u on u.id=s.supplente
+        INNER JOIN ora o on o.id=s.ora
+        INNER JOIN assenza a on a.id=s.assenza
+        WHERE a.id=:id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

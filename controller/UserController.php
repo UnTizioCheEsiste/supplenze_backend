@@ -44,7 +44,7 @@ class UserController extends BaseController
                 $userId = $user->login($email, $password);
 
                 if ($userId < 0) {
-                    http_response_code(404);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Credenziali errate"]);
                     break;
                 }
@@ -131,7 +131,7 @@ class UserController extends BaseController
                     $userInfo = $user->GetArchiveUserAbsence($params['id']);
 
                     if (empty($userInfo)) {
-                        http_response_code(404);
+                        http_response_code(401);
                         echo json_encode(["success" => false, "data" => "Utente non trovato"]);
                         break;
                     }
