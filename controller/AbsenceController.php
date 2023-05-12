@@ -1,4 +1,5 @@
 <?php
+//importo il base controller e altri eventuali model necessari
 require_once PROJECT_ROOT_PATH . "/controller/BaseController.php";
 require_once PROJECT_ROOT_PATH . "/model/absence.php";
 
@@ -17,38 +18,86 @@ class AbsenceController extends BaseController
 
         switch ($this->uri) {
             case "getArchiveAbsence":
-                // (5)
-                $absence->getArchiveAbsence();
+                //richiamo il metodo nel model
+                $absences=$absence->getArchiveAbsence();
+
+                //controllo sul valore restituito
+                if (empty($absences)) {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                    break;
+                }
+
+                //restituisco i dati 
+                http_response_code(200);
+                echo json_encode(["success" => true, "data" => $absences]);
                 break;
             case "getAbsence":
-                // (6)
+                $params = $this->getQueryStringParams();
+
+                if(empty($params["id"]))
+                {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Prametro non inserito"]);
+                    break;
+                }
+                else
+                {
+                    $absenceInfo = $absence->getAbsence($params['id']);
+
+                    if (empty($absenceInfo)) {
+                        http_response_code(404);
+                        echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+                        break;
+                    }
+
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $absenceInfo]);
+                    break;
+                }
                 break;
             case "addCertificate":
+                //ottengo gli input e assegno a delle variabili i vari parametri del body
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
-                $absenceId = $data->absenceId;
-                $certificate = $data->certificate_code;
 
+                //se i parametri obbligatori non sono forniti
                 if (empty($data->absenceId) || empty($data->certificate_code)) {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
                 }
 
+                //assegno i paremtri obbligatori
+                $absenceId = $data->absenceId;
+                $certificate = $data->certificate_code;
+
+                //richaimo la query nel model che restituisce true o false
                 $result = $absence->addCertificate($absenceId, $certificate);
 
+                //se non va a buon fine segnalo l'errore
                 if (!$result) {
                     http_response_code(400);
                     echo json_encode(["success" => false, "data" => "Certificato non aggiunto"]);
                     break;
                 }
                 
+                //altrimenti seganlo il successo dell'operazione
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $result]);
                 break;
             case "addAbsenceHour":
+                //prelevo i dati dal body e assegno le variabili dei dati obbligatori
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
+
+                //se i parametri obbligatori non sono forniti
+                if (empty($data->userId) || empty($data->date) || empty($data->hours) || empty($data->reason)) {
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
+                    break;
+                }
+
                 $userId = $data->userId;
                 $date = $data->date;
                 $hours = $data->hours;
@@ -58,25 +107,18 @@ class AbsenceController extends BaseController
                 if (empty($data->certificate_code)) 
                 {
                     $certificate = "";
+                }else{
+                    $certificate = $data->certificate_code;
                 }
                 
                 // Controllo sulla presenza del campo opzionale note
                 if (empty($data->notes)) {
                     $notes = "";
-                }
-
-                // Controllo sulla presenza dei campi obbligatori
-                if (empty($data->userId) || empty($data->date) || empty($data->hours) || empty($data->reason)) {
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
-                    break;
-                }
-
-                // Nel caso esistessero i due campi opzionali
-                if (!empty($data->certificate_code) && !empty($data->notes)) {
+                }else{
                     $notes = $data->notes;
-                    $certificate = $data->certificate_code;
+                    
                 }
+
 
                 // Aggiunta della/e assenza/e
                 $result = $absence->addAbsenceHour($userId, $date, $hours, $certificate, $notes, $reason);
@@ -93,6 +135,14 @@ class AbsenceController extends BaseController
             case "addAbsenceSingleDay":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
+
+                 // Controllo sulla presenza dei campi obbligatori
+                 if (empty($data->userId) || empty($data->date) || empty($data->reason)) {
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
+                    break;
+                }
+
                 $userId = $data->userId;
                 $date = $data->date;
                 $reason = $data->reason;
@@ -101,24 +151,15 @@ class AbsenceController extends BaseController
                 if (empty($data->certificate_code)) 
                 {
                     $certificate = "";
+                }else{
+                    $certificate = $data->certificate_code;
                 }
                 
                 // Controllo sulla presenza del campo opzionale note
                 if (empty($data->notes)) {
                     $notes = "";
-                }
-
-                // Controllo sulla presenza dei campi obbligatori
-                if (empty($data->userId) || empty($data->date) || empty($data->reason)) {
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
-                    break;
-                }
-
-                // Nel caso esistessero i due campi opzionali
-                if (!empty($data->certificate_code) && !empty($data->notes)) {
+                }else{
                     $notes = $data->notes;
-                    $certificate = $data->certificate_code;
                 }
 
                 // Aggiunta della/e assenza/e
@@ -136,6 +177,14 @@ class AbsenceController extends BaseController
             case "addAbsenceMultipleDay":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
+
+                // Controllo sulla presenza dei campi obbligatori
+                if (empty($data->userId) || empty($data->dates) || empty($data->reason)) {
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
+                    break;
+                }
+
                 $userId = $data->userId;
                 $dates = $data->dates;
                 $reason = $data->reason;
@@ -153,13 +202,6 @@ class AbsenceController extends BaseController
                     $notes = "";
                 }else{
                     $notes = $data->notes;
-                }
-
-                // Controllo sulla presenza dei campi obbligatori
-                if (empty($data->userId) || empty($data->dates) || empty($data->reason)) {
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
-                    break;
                 }
 
                 // Aggiunta della/e assenza/e
@@ -180,20 +222,22 @@ class AbsenceController extends BaseController
                 if(empty($params["id"]))
                 {
                     http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Assenza non trovata"]);
-                    break;
-                }else{
-                    $success = $absence->ungroupAbsence($params['id']);
-
-                if (empty($success)) {
-                    http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Assenza non trovata"]);
+                    echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
                     break;
                 }
+                else
+                {
+                    $success = $absence->ungroupAbsence($params['id']);
 
-                http_response_code(200);
-                echo json_encode(["success" => true, "data" => $success]);
-                break;
+                    if (empty($success)) {
+                        http_response_code(404);
+                        echo json_encode(["success" => false, "data" => "Assenza non trovata"]);
+                        break;
+                    }
+
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $success]);
+                    break;
                 }
         }
     }
