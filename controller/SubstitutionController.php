@@ -35,14 +35,9 @@ class SubstitutionController extends BaseController
                 $hour = $data->ora;
 
                 // Nel caso i parametri opzionali non fossero presenti viene assegnato un valore stringa vuota
-                if (empty($data->data_supplenza))   {   $substitution_date = "";    }
-                if (empty($data->nota)) {   $note = ""; }
+                if (empty($data->data_supplenza))   {   $substitution_date = "";    } else{$substitution_date = $data->data_supplenza;}
+                if (empty($data->nota)) {   $note = ""; } else{$note = $data->nota;}
                 
-                if (!empty($data->data_supplenza) && !empty($data->nota))
-                {
-                    $substitution_date = $data->data_supplenza;
-                    $note = $data->nota;
-                }
                 
                 // Aggiunta delle supplenze
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
