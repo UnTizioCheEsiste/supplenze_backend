@@ -13,11 +13,19 @@ set_error_handler("errorHandler::handleError");
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
+/**
+ *                        0          1         2         3
+ *  esempio uri http://localhost/supplenze/utente/getUser.php
+ * 
+ * 
+ */
+
+//switch sull'url per smistare a uno dei vari controller
 switch ($uri[2]) {
     case "utente":
         require PROJECT_ROOT_PATH . "/controller/UserController.php";
         $user = new UserController($uri[3]);
-        $user->processRequest();
+        $user->processRequest();//questo metodo processa la richiesta guardando alla parte dell'url dopo UserController
         break;
     case "assenza":
         require PROJECT_ROOT_PATH . "/controller/AbsenceController.php";

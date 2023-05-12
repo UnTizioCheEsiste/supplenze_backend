@@ -75,26 +75,27 @@ class Absence extends Database
 
         $absence = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Data inizio
+        // Data inizio in formato datetime per il date difference
         $di = new DateTime($absence["data_inizio"]);
 
-        // Data fine
+        // Data fine in formato datetime per il date difference
         $df = new DateTime($absence["data_fine"]);
 
+        //date difference un oggetto json con la differenza divisa per giorni ore minuti secondi
         $dateDifference = date_diff($df, $di);
 
-        // Divisione data da ora
+        // Divisione data da ora, data inizio e data fine sono due vettori con alla posizione 0 la data e alla posizione 1 l'ora
         $data_inizio = explode(" ", $absence["data_inizio"]);
         $data_fine = explode(" ", $absence["data_fine"]);
 
         $time = new Time();
-        $hours = $time->getHour();
+        $hours = $time->getHour();//oggetto che contiene tutte le ore del database con i rwlativi id, inizio e fine
 
-        // Se l'assenza rientra in un giorno
+        // Se l'assenza rientra in un giorno, ovvero data inizio e fine sono uguali e la differenza di ore è minore di 5 ore e mezza
         if ($data_inizio[0] === $data_fine[0] && $dateDifference->h === "5" && $dateDifference->i === "30")
         {
+            //variabile che conterrà l'id dell'ora dato che siamo nel caso di assenze singola ora o ore multiple(comunque spezzate in singole)
             $hourId = 0;
-            // Get dell'id dell'ora
             foreach ($hours as $hour)
             {
                 // Se l'ora di inizio e di fine combaciano con un'ora della tabella "ora"
@@ -106,7 +107,7 @@ class Absence extends Database
                 }
             }
 
-            // Insert della supplenza singola
+            // Insert dell'assenza singola ora nella tabella supplenze, dato che dovrà essere coperta
             $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
                     VALUES (:assenza, :ora, :data_supplenza)";
                 
@@ -116,22 +117,23 @@ class Absence extends Database
             $stmt->bindValue(':data_supplenza', $data_inizio[0], PDO::PARAM_STR);
             $exc=$stmt->execute();
             
-            if(!$exc) return false;
+            if(!$exc) return false;//se non va a buon fine la query
         }
-        else 
+        else //nel caso in cui sia una assenza di un giorno intero o di più giorni
         {
-            //fcreare un array con i giorni dalla data di inizio alla data di fine
+            //creare un array con i giorni dalla data di inizio alla data di fine
             //ciclo dove cicli i giorni e poi cicli le ore (nested) in cui fai insert into supplenze 
-            $current_date=strtotime($data_inizio[0]);
-            $last_date=strtotime($data_fine[0]);
+            $current_date=strtotime($data_inizio[0]);//data del primo giorno (alla posizaione 0 di data_inizio c'è la data percè precedentemente ho fatto lo split)
+            $last_date=strtotime($data_fine[0]);//data dell'ultimo giorno
 
+            //vado a creare un array con le date dalla prima all'ultima
             $date_array=array();
             while($current_date<=$last_date){
                 $date_array[]=date('Y-m-d',$current_date);
                 $current_date=strtotime("+1 day",$current_date);
             }
 
-            $insertCounter=0;
+            $insertCounter=0;//controllo se le ore inserite sono quelle effettivamente da coprire
             foreach($date_array as $day)
             {
                 foreach($hours as $hour)
@@ -145,13 +147,13 @@ class Absence extends Database
                     $stmt->bindValue(':data_supplenza', $day, PDO::PARAM_STR);
 
                     $exc = $stmt->execute();
-                    $exc ? $insertCounter++ : null;
+                    $exc ? $insertCounter++ : null;//se ho eseguito incremento il counter, se c'è un errore non lo incremento
 
-                    if (!$exc) return false;
+                    if (!$exc) return false; //se non ho eseguito ritorno false
                 }
                 $insertCounter++;
             }
-            return count($hours) + count($date_array) === $insertCounter;
+            return count($hours) + count($date_array) === $insertCounter; //se il counter non è uguale alla somma delle ore e dei giorni ritorno false
         }
 
     }
@@ -197,7 +199,7 @@ class Absence extends Database
 
             if (!$exc) return false;
 
-            // Insert in supplenza
+            // Insert in supplenza, dato che è un'ora singola la aggiungo anche in questa tabella
             $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
                     VALUES (:id, :ora, :data_supplenza)";
 
@@ -206,22 +208,20 @@ class Absence extends Database
             $st->bindValue(':ora', $hour, PDO::PARAM_STR);
             $st->bindValue('data_supplenza', $date, PDO::PARAM_STR);
 
-            return $exc && $st->execute();
-
-
+            return $exc && $st->execute();//true se entrambe le query sono andate a buon fine
         } 
-        else 
+        else //se ho più ore passo un vettore di ore dal frontend ma nelle tabelle devono essere divise e inserite come righe singole
         {
             // Variabile per il controllo del corretto inserimento
             $insertCounter = 0;
 
-            // Ciclo per le ore di assenza
+            // Ciclo per le ore di assenza (è un vettore)
             foreach ($hours as $h) 
             {
-                // Ora inizio assenza
+                // Ora inizio assenza, la ottengo tramite il vettore di id ($hours) passato al metodo
                 $hour = $time->getHourById($h);
 
-                // Concatenzione giorno e ora
+                // Concatenzione giorno e ora (date è fissa perchè siamo in assenza di più ore nello stesso giorno)
                 $data_inizio = $date . " " . $hour["data_inizio"];
                 $data_fine = $date . " " . $hour["data_fine"];
 
@@ -238,11 +238,11 @@ class Absence extends Database
                 $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
                 $exc = $stmt->execute();
-                $exc ? $insertCounter++ : null;
+                $exc ? $insertCounter++ : null; //incremento un counter per vedere se ho inserito tutte le ore
 
                 if (!$exc) return false;
 
-                // Insert in supplenza
+                // Insert in supplenza, ache qui inserisco l'ora di assenza anche nella tabella supplenze
                 $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
                         VALUES (:id, :ora, :data_supplenza)";
 
@@ -291,7 +291,7 @@ class Absence extends Database
     }
 
     /**
-     * Aggiunge un insieme di giornidi assenza alla tabella "assenza".
+     * Aggiunge un insieme di giornidi assenza alla tabella "assenza". Queste sono accorpate e saranno disaccorpate dalla api ungroup
      * 
      * @param int $userId ID dell'utente.
      * @param string[] $dates Giorni di assenza.
