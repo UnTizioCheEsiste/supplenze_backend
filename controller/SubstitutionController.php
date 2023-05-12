@@ -19,60 +19,70 @@ class SubstitutionController extends BaseController
             case "addSubstitute":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
-                //VARIABILI NECESSARIE: $id_absence, $id_user, $not_necessary, $to_pay
-                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria)) {
-                    //errore perche sono variabili necessarie
+
+                // Controllo presenza parametri necessari
+                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria))
+                {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
                 }
+
                 $id_absence = $data->assenza;
                 $id_user = $data->supplente;
                 $not_necessary = $data->non_necessaria;
                 $to_pay = $data->da_retribuire;
                 $hour = $data->ora;
 
-                // Se non hanno un valore do una stringa vuota
-                if (empty($data->data_supplenza)) {
-                    $substitution_date = "";
-                }
-
-                if (empty($data->nota)) {
-                    $note = "";
-                }
+                // Nel caso i parametri opzionali non fossero presenti viene assegnato un valore stringa vuota
+                if (empty($data->data_supplenza))   {   $substitution_date = "";    }
+                if (empty($data->nota)) {   $note = ""; }
                 
-                // Se hanno un valore li assegno
-                if (!empty($data->data_supplenza) && !empty($data->nota)) {
+                if (!empty($data->data_supplenza) && !empty($data->nota))
+                {
                     $substitution_date = $data->data_supplenza;
                     $note = $data->nota;
                 }
                 
+                // Aggiunta delle supplenze
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
 
-                if (!$newSubstitute) { //se ritorna FALSE
+                // Se la supplenza non viene assegnata
+                if (!$newSubstitute)
+                {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Operazione non completata"]);
                     break;
                 }
+
+                // Se tutto è andato a buon fine
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => "Riga aggiunta con successo"]);
                 break;
             // case "addSubtituteTeaching":
             //     break;
             case "getArchiveSubstitution":
+                // Ottenimento delle supplenze
                 $archiveSub = $sub->getArchiveSubstitution();
-                if (empty($archiveSub)) {
-                    http_response_code(500);
+
+                // Nel caso non ci fossero supplenze
+                if (empty($archiveSub)) 
+                {
+                    http_response_code(204);
                     echo json_encode(["success" => false, "data" => "Errore nell'operazione"]);
                     break;
                 }
+
+                // Se tutto è andato a buon fine
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $archiveSub]);
                 break;
             case "getArchiveUserSubstitution":
                 $params = $this->getQueryStringParams();
-                if (empty($params["id"])) { //se non è stato indicato l'ID
-                    http_response_code(200);
+
+                // Se l'ID dell'utente non è presente
+                if (empty($params["id"])) {
+                    http_response_code(400);
                     echo json_encode(["success" => false, "data" => "Non è presente l'id"]);
                     break;
                 } else if(is_int($params["id"])){

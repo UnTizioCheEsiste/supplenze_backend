@@ -32,20 +32,19 @@ class TimeController extends BaseController
                 {
                     http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Ora non trovata"]);
-                    break;
                 }else{
                     $hourInfo = $time->getHourById($params['id']);
 
-                if (empty($hourInfo)) {
-                    http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Ora non trovata"]);
-                    break;
-                }
+                    if (empty($hourInfo)) {
+                        http_response_code(404);
+                        echo json_encode(["success" => false, "data" => "Ora non trovata"]);
+                        break;
+                    }
 
-                http_response_code(200);
-                echo json_encode(["success" => true, "data" => $hourInfo]);
-                break;
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $hourInfo]);
                 }
+                break;
         }
     }
 }
