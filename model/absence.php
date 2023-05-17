@@ -63,7 +63,7 @@ class Absence extends Database
      * @param int $id ID dell'assenza.
      * @return mixed supplenze singole e giorno.
      */
-    public function devideAbsence($id)
+    public function divideAbsence($id)
     {
         // Get dell'assenza
         $sql = "SELECT *
@@ -289,7 +289,7 @@ class Absence extends Database
         $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
         $result = $stmt->execute();
-        $this->devideAbsence($this->conn->lastInsertId());
+        $this->divideAbsence($this->conn->lastInsertId());
         return $result;
     }
 
@@ -322,7 +322,7 @@ class Absence extends Database
         $stmt->bindValue(':nota', $notes, PDO::PARAM_STR);
 
         $result = $stmt->execute();
-        $this->devideAbsence($this->conn->lastInsertId());
+        $this->divideAbsence($this->conn->lastInsertId());
         return $result;  
     }
 

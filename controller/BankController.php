@@ -57,7 +57,6 @@ class BankController extends BaseController
                     echo json_encode(["success" => false, "data" => "Id non inserito."]);
                     break;
                 }
-                break;
             case "addUserHoursBank":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
