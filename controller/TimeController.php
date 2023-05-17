@@ -31,7 +31,7 @@ class TimeController extends BaseController
                 if(empty($params["id"]))
                 {
                     http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Ora non trovata"]);
+                    echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
                 }else{
                     $hourInfo = $time->getHourById($params['id']);
 

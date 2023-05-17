@@ -18,9 +18,13 @@ class AvailabilityController extends BaseController
         switch ($this->uri) {
             case "getArchiveAvailability":
                 $archiveAva = $ava->getArchiveAvailability();
-                if(empty($archiveAva)){
+                if(!$archiveAva){
                     http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non è presente alcun dato"]);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione dell'API"]);
+                }
+                if(empty($archiveAva)){
+                    http_response_code(204);
+                    echo json_encode(["success" => true, "data" => $archiveAva]);
                 }
                 http_response_code(200);
                     echo json_encode(["success" => true, "data" => $archiveAva]);
@@ -51,11 +55,11 @@ class AvailabilityController extends BaseController
 
                 // Controllo variabili
                 if (empty($data->docente) || empty($data->disponibilita)) {
-                    http_response_code(500);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "I dati hanno un formato errato"]);
                     break;
                 } else if (!is_int($data->docente) || !is_int($data->disponibilita)) {
-                    http_response_code(500);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "I dati hanno un formato errato"]);
                     break;
                 }
@@ -65,14 +69,14 @@ class AvailabilityController extends BaseController
                 // Controllo se type1 è data_inizio o giorno
                 if (empty($data->data_inizio) || empty($data->data_fine)) {
                     if (empty($data->giorno) || empty($data->ora)) {
-                        http_response_code(500);
+                        http_response_code(401);
                         echo json_encode(["success" => false, "data" => "Attributi mancanti"]);
                         break;
                     }
 
                     // Allora sono giorno e ora. Controllo i valori
                     if (!is_int($data->giorno) || !is_int($data->ora)) { // perche sono ID
-                        http_response_code(500);
+                        http_response_code(401);
                         echo json_encode(["success" => false, "data" => "I dati hanno un formato errato"]);
                         break;
                     }
@@ -81,7 +85,7 @@ class AvailabilityController extends BaseController
                     $is_date = false;
                 } else {
                     if (!strtotime($data->data_inizio) || !strtotime($data->data_fine)) {
-                        http_response_code(500);
+                        http_response_code(401);
                         echo json_encode(["success" => false, "data" => "I dati hanno un formato errato"]);
                         break;
                     }
@@ -102,7 +106,7 @@ class AvailabilityController extends BaseController
             case "removeAvailability":
                 $params = $this->getQueryStringParams();
                 if (empty($params["id"])) {
-                    http_response_code(500);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non è presente l'ID"]);
                     break;
                 }
@@ -119,8 +123,8 @@ class AvailabilityController extends BaseController
                 $typeAva = $ava->getArchiveTypeAvailability();
 
                 if (empty($typeAva)) {
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Non sono presenti valori nella tabella"]);
+                    http_response_code(204);
+                    echo json_encode(["success" => true, "data" => $typeAva]);
                     break;
                 }
                 http_response_code(200);

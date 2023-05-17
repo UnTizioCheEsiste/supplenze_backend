@@ -23,7 +23,7 @@ class SubstitutionController extends BaseController
                 // Controllo presenza parametri necessari
                 if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria))
                 {
-                    http_response_code(500);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
                 }
@@ -64,7 +64,7 @@ class SubstitutionController extends BaseController
                 if (empty($archiveSub)) 
                 {
                     http_response_code(204);
-                    echo json_encode(["success" => false, "data" => "Errore nell'operazione"]);
+                    echo json_encode(["success" => true, "data" => $archiveSub]);
                     break;
                 }
 
@@ -77,21 +77,21 @@ class SubstitutionController extends BaseController
 
                 // Se l'ID dell'utente non è presente
                 if (empty($params["id"])) {
-                    http_response_code(400);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non è presente l'id"]);
                     break;
                 } else if(is_int($params["id"])){
                     $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
                     if (empty($archiveUserSub)) {
-                        http_response_code(200);
-                        echo json_encode(["success" => false, "data" => "L'utente non ha supplenze"]);
+                        http_response_code(204);
+                        echo json_encode(["success" => true, "data" => $archiveUserSub]);
                         break;
                     }
                     http_response_code(200);
                     echo json_encode(["success" => true, "data" => $archiveUserSub]);
                     break;
                 } else {
-                    http_response_code(200);
+                    http_response_code(401);
                         echo json_encode(["success" => false, "data" => "L'id inserito non è un intero"]);
                         break;
                 }

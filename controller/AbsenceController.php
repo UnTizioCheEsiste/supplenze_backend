@@ -192,7 +192,7 @@ class AbsenceController extends BaseController
 
                 if($data->dates[0]>($data->dates[count($data->dates)-1]))
                 {
-                    http_response_code();
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Date errate"]);
                     break;
                 }
