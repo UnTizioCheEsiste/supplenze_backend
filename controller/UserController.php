@@ -39,8 +39,16 @@ class UserController extends BaseController
             case "login":
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
+
+                if(empty($data->email) || empty($data->password)){
+                    http_response_code(401);
+                    echo json_encode(["success" => false, "data" => "Non sono presenti gli attributi richiesti"]);
+                    break;
+                }
+
                 $email = $data->email;
                 $password = $data->password;
+
                 $userId = $user->login($email, $password);
 
                 if ($userId < 0) {
@@ -49,7 +57,7 @@ class UserController extends BaseController
                     break;
                 }
 
-                $userInfo = $user->getUser($userId);
+                $userInfo = $user->getUser($userId["id"]);
 
                 if (empty($userInfo)) {
                     http_response_code(404);
@@ -59,7 +67,7 @@ class UserController extends BaseController
 
                 $userData =
                     [
-                        "id" => $userId,
+                        "id" => $userId["id"],
                         "nome" => $userInfo["nome"],
                         "cognome" => $userInfo["cognome"],
                         "email" => $userInfo["email"],

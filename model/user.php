@@ -63,7 +63,7 @@ class User extends Database
             return $pwdLoginReset["id"];
         }
 
-        return $pwdLoginNormale["id"];
+        return $pwdLoginNormale;
     }
 
     /**
