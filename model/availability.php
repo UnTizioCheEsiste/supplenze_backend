@@ -22,7 +22,11 @@ class Availability extends Database
                 on u.id = d.docente 
                 WHERE 1=1";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        } catch (Exception $e){
+            return 0;
+        }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
@@ -108,7 +112,6 @@ class Availability extends Database
     // Aggiunge una nuova disponibilita nella tabella disponibilita
     public function addAvailability($teacher, $availability_type, $type1, $type2, $is_date)
     {
-
         //type1 può essere data_inizio o giorno
         //type2 può essere data_fine e ora
         $sql1 = "SELECT INTO disponibilita (docente, tipo_disponibilita, data_inizio, data_fine)
@@ -128,10 +131,12 @@ class Availability extends Database
         $stmt->bindValue(":teacher", $teacher, PDO::PARAM_INT);
         $stmt->bindValue(":availability_type", $availability_type, PDO::PARAM_INT);
 
-        if ($stmt->execute()) {
-            return true;
+        try{
+            $stmt->execute();
+        } catch (Exception $e){
+            return false;
         }
-        return false;
+        return true;
     }
 
     // Rimuove la disponibilita dato il suo ID

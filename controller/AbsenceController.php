@@ -97,16 +97,16 @@ class AbsenceController extends BaseController
                 $data = json_decode($json);
 
                 //se i parametri obbligatori non sono forniti
-                if (empty($data->userId) || empty($data->date) || empty($data->hours) || empty($data->reason)) {
-                    http_response_code(500);
+                if (empty($data->utente) || empty($data->data) || empty($data->ora) || empty($data->motivazione)) {
+                    http_response_code(400);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
                 }
 
-                $userId = $data->userId;
-                $date = $data->date;
-                $hours = $data->hours;
-                $reason = $data->reason;
+                $userId = $data->utente;
+                $date = $data->data;
+                $hours = $data->ora;
+                $reason = $data->motivazione;
                 
                 // Controllo sulla presenza del campo opzionale certificato medico
                 if (empty($data->certificate_code)) 
@@ -124,12 +124,11 @@ class AbsenceController extends BaseController
                     
                 }
 
-
                 // Aggiunta della/e assenza/e
                 $result = $absence->addAbsenceHour($userId, $date, $hours, $certificate, $notes, $reason);
 
                 if (!$result) {
-                    http_response_code(400);
+                    http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Assenza non aggiunta"]);
                     break;
                 }

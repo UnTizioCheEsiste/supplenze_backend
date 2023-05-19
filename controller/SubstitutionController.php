@@ -21,8 +21,7 @@ class SubstitutionController extends BaseController
                 $data = json_decode($json);
 
                 // Controllo presenza parametri necessari
-                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria))
-                {
+                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria)) {
                     http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
@@ -35,16 +34,23 @@ class SubstitutionController extends BaseController
                 $hour = $data->ora;
 
                 // Nel caso i parametri opzionali non fossero presenti viene assegnato un valore stringa vuota
-                if (empty($data->data_supplenza))   {   $substitution_date = "";    } else{$substitution_date = $data->data_supplenza;}
-                if (empty($data->nota)) {   $note = ""; } else{$note = $data->nota;}
-                
-                
+                if (empty($data->data_supplenza)) {
+                    $substitution_date = "";
+                } else {
+                    $substitution_date = $data->data_supplenza;
+                }
+                if (empty($data->nota)) {
+                    $note = "";
+                } else {
+                    $note = $data->nota;
+                }
+
+
                 // Aggiunta delle supplenze
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
 
                 // Se la supplenza non viene assegnata
-                if (!$newSubstitute)
-                {
+                if (!$newSubstitute) {
                     http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Operazione non completata"]);
                     break;
@@ -61,8 +67,7 @@ class SubstitutionController extends BaseController
                 $archiveSub = $sub->getArchiveSubstitution();
 
                 // Nel caso non ci fossero supplenze
-                if (empty($archiveSub)) 
-                {
+                if (empty($archiveSub)) {
                     http_response_code(204);
                     echo json_encode(["success" => true, "data" => $archiveSub]);
                     break;
@@ -77,24 +82,14 @@ class SubstitutionController extends BaseController
 
                 // Se l'ID dell'utente non è presente
                 if (empty($params["id"])) {
-                    http_response_code(401);
+                    http_response_code(400);
                     echo json_encode(["success" => false, "data" => "Non è presente l'id"]);
                     break;
-                } else if(is_int($params["id"])){
-                    $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
-                    if (empty($archiveUserSub)) {
-                        http_response_code(204);
-                        echo json_encode(["success" => true, "data" => $archiveUserSub]);
-                        break;
-                    }
-                    http_response_code(200);
-                    echo json_encode(["success" => true, "data" => $archiveUserSub]);
-                    break;
-                } else {
-                    http_response_code(401);
-                        echo json_encode(["success" => false, "data" => "L'id inserito non è un intero"]);
-                        break;
                 }
+                $archiveUserSub = $sub->getArchiveUserSubstitution($params['id']);
+                http_response_code(200);
+                echo json_encode(["success" => true, "data" => $archiveUserSub]);
+                break;
 
         }
     }
