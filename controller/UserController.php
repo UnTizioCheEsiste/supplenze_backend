@@ -5,9 +5,8 @@ require_once PROJECT_ROOT_PATH . "/model/user.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 // importa la libreria PHPMailer
-require_once 'phpmailer/src/Exception.php';
-require_once 'phpmailer/src/PHPMailer.php';
-require_once 'phpmailer/src/SMTP.php';
+require 'vendor/autoload.php';
+
 
 class UserController extends BaseController
 {
@@ -93,35 +92,6 @@ class UserController extends BaseController
 
                 if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
                 {
-                    // configura le impostazioni della tua email
-                    /*$from = '';
-                    $to = 'chiozzi.giulio@iisviolamarchesini.edu.it';
-                    $subject = 'Oggetto della email';
-                    $body = 'Corpo del messaggio';
-
-                    // configura le impostazioni del server SMTP di Google
-                    $mail = new PHPMailer;
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->Port = 587;
-                    $mail->SMTPSecure = 'tls';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = '';
-                    $mail->Password = '';
-
-                    // imposta le informazioni della email
-                    $mail->setFrom($from);
-                    $mail->addAddress($to);
-                    $mail->Subject = $subject;
-                    $mail->Body = $body;
-
-                    // invia la email
-                    if(!$mail->send()) {
-                        echo 'Errore durante l\'invio della email: ' . $mail->ErrorInfo;
-                    } else {
-                        echo 'Email inviata con successo!';
-                    }*/
-
                     echo json_encode(["success" => true, "data" => "Email inviata correttamente."]);
                 }else{
                     //messaggio errore
@@ -187,6 +157,38 @@ class UserController extends BaseController
                     echo json_encode(["success" => false, "data" => "Id non inserito"]);
                     break;
                 }
+            break;
+            case 'provaEmail':
+                // configura le impostazioni della tua email
+                    $from = 'frapirra123@gmail.com';
+                    $to = 'medea.luca@iisviolamarchesini.edu.it';
+                    $subject = 'email inviata';
+                    $body = 'Guarda che bravo che sono';
+
+                    // configura le impostazioni del server SMTP di Google
+                    $mail = new PHPMailer;
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = 'tls';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'frapirra123@gmail.com';
+                    $mail->Password = 'zikiridqjnvxodhj';
+
+                    // imposta le informazioni della email
+                    $mail->setFrom($from);
+                    $mail->addAddress($to);
+                    $mail->Subject = $subject;
+                    $mail->Body = $body;
+
+                    // invia la email
+                    if(!$mail->send()) {
+                        echo 'Errore durante l\'invio della email: ' . $mail->ErrorInfo;
+                        http_response_code(400);
+                    } else {
+                        echo 'Email inviata con successo!';
+                        http_response_code(200);
+                    }
                 break;
         }
     }
