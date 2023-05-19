@@ -121,22 +121,25 @@ class UserController extends BaseController
                 break;
             case "getArchiveUser":
                 $userInfo = $user->getArchiveUser();
-                
-                if (empty($userInfo)) {
-                    http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
+
+                if(!$userInfo){
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione dell'API"]);
                     break;
+                } else if($userInfo == null){
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Array vuoto"]);
                 }
 
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $userInfo]);
                 break;
             
-            case "GetArchiveUserAbsence":
+            case "getArchiveUserAbsence":
                 $params = $this->getQueryStringParams();
                 if(!empty($params["id"]))
                 {
-                    $userInfo = $user->GetArchiveUserAbsence($params['id']);
+                    $userInfo = $user->getArchiveUserAbsence($params['id']);
 
                     if (empty($userInfo)) {
                         http_response_code(401);
@@ -148,7 +151,7 @@ class UserController extends BaseController
                     echo json_encode(["success" => true, "data" => $userInfo]);
                     break;
                 }else{
-                    http_response_code(404);
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Id non inserito"]);
                     break;
                 }

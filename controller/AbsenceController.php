@@ -37,8 +37,8 @@ class AbsenceController extends BaseController
 
                 if(empty($params["id"]))
                 {
-                    http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Prametro non inserito"]);
+                    http_response_code(401);
+                    echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
                     break;
                 }
                 else
@@ -61,15 +61,15 @@ class AbsenceController extends BaseController
                 $data = json_decode($json);
 
                 //se i parametri obbligatori non sono forniti
-                if (empty($data->absenceId) || empty($data->certificate_code)) {
-                    http_response_code(500);
+                if (empty($data->assenza) || empty($data->certificato)) {
+                    http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
                 }
 
                 //assegno i paremtri obbligatori
-                $absenceId = $data->absenceId;
-                $certificate = $data->certificate_code;
+                $absenceId = $data->assenza;
+                $certificate = $data->certificato;
 
                 if(empty($absence->getAbsence($absenceId)))
                 {

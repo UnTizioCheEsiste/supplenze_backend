@@ -190,14 +190,13 @@ class User extends Database
         WHERE 1=1";
 
         $stmt = $this->conn->prepare($sql);
-
-        $stmt->execute();
+        $result = $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function GetArchiveUserAbsence($id)
+    public function getArchiveUserAbsence($id)
     {
-        $sql = "SELECT concat(u.nome,' ',u.cognome) as utente,m.nome,a.certificato_medico,a.data_inizio,a.data_fine,a.nota
+        $sql = "SELECT concat(u.nome,' ',u.cognome) as utente, m.nome, a.certificato_medico, a.data_inizio, a.data_fine, a.nota
         FROM assenza a 
         inner join utente u on u.id=a.docente
         inner join motivazione m on m.id=a.motivazione
