@@ -1,6 +1,13 @@
 <?php
 require_once PROJECT_ROOT_PATH . "/controller/BaseController.php";
 require_once PROJECT_ROOT_PATH . "/model/user.php";
+//INVIO MAIL DA GESTIRE
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+// importa la libreria PHPMailer
+require_once 'phpmailer/src/Exception.php';
+require_once 'phpmailer/src/PHPMailer.php';
+require_once 'phpmailer/src/SMTP.php';
 
 class UserController extends BaseController
 {
@@ -86,7 +93,35 @@ class UserController extends BaseController
 
                 if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
                 {
-                    //INVIO MAIL DA GESTIRE
+                    // configura le impostazioni della tua email
+                    /*$from = '';
+                    $to = 'chiozzi.giulio@iisviolamarchesini.edu.it';
+                    $subject = 'Oggetto della email';
+                    $body = 'Corpo del messaggio';
+
+                    // configura le impostazioni del server SMTP di Google
+                    $mail = new PHPMailer;
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = 'tls';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = '';
+                    $mail->Password = '';
+
+                    // imposta le informazioni della email
+                    $mail->setFrom($from);
+                    $mail->addAddress($to);
+                    $mail->Subject = $subject;
+                    $mail->Body = $body;
+
+                    // invia la email
+                    if(!$mail->send()) {
+                        echo 'Errore durante l\'invio della email: ' . $mail->ErrorInfo;
+                    } else {
+                        echo 'Email inviata con successo!';
+                    }*/
+
                     echo json_encode(["success" => true, "data" => "Email inviata correttamente."]);
                 }else{
                     //messaggio errore
@@ -121,25 +156,22 @@ class UserController extends BaseController
                 break;
             case "getArchiveUser":
                 $userInfo = $user->getArchiveUser();
-
-                if(!$userInfo){
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione dell'API"]);
+                
+                if (empty($userInfo)) {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Utente non trovato"]);
                     break;
-                } else if($userInfo == null){
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Array vuoto"]);
                 }
 
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $userInfo]);
                 break;
             
-            case "getArchiveUserAbsence":
+            case "GetArchiveUserAbsence":
                 $params = $this->getQueryStringParams();
                 if(!empty($params["id"]))
                 {
-                    $userInfo = $user->getArchiveUserAbsence($params['id']);
+                    $userInfo = $user->GetArchiveUserAbsence($params['id']);
 
                     if (empty($userInfo)) {
                         http_response_code(401);
@@ -151,7 +183,7 @@ class UserController extends BaseController
                     echo json_encode(["success" => true, "data" => $userInfo]);
                     break;
                 }else{
-                    http_response_code(401);
+                    http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Id non inserito"]);
                     break;
                 }
