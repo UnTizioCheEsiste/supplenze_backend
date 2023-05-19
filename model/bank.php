@@ -3,9 +3,13 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 
 class Bank extends Database
 {
+    /**
+    * Restituisce lo storico delle ore da recuperare o straordinarie.
+    *
+    * @return mixed Array di ore.
+    */
     public function getArchiveCountHoursBank()
     {
-        //query unica per ore da recuperare e ore straordinari
         $sql = "SELECT u.id, CONCAT(u.nome,' ',u.cognome) as utente, SUM(CASE WHEN bo.tipo_ora = 'da recuperare' THEN bo.numero_ore ELSE 0 END) as ore_da_recuperare, SUM(CASE WHEN bo.tipo_ora = 'straordinario' THEN bo.numero_ore ELSE 0 END) as ore_straordinarie
                 FROM banca_ore bo
                 INNER JOIN utente u ON u.id = bo.docente
@@ -18,6 +22,13 @@ class Bank extends Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+    * Restituisce tutte le ore da recuperare o straordinarie di un utente.
+    *
+    * @param int $id ID dell'utente.
+    *
+    * @return mixed Array di ore.
+    */
     public function getUserHoursBank($id)
     {
         $sql = "select concat(u.nome, ' ', u.cognome) as docente, bo.giorno, bo.tipo_ora, bo.numero_ore, bo.nota
@@ -32,6 +43,13 @@ class Bank extends Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+    * Restituisce il totale di ore da recuperare o straordinarie.
+    *
+    * @param int $id ID dell'utente.
+    *
+    * @return mixed Array di ore.
+    */
     public function getUserCountHoursBank($id)
     {
         $sql = "SELECT u.id, CONCAT(u.nome,' ',u.cognome) as utente, SUM(CASE WHEN bo.tipo_ora = 'da recuperare' THEN bo.numero_ore ELSE 0 END) as ore_da_recuperare, SUM(CASE WHEN bo.tipo_ora = 'straordinario' THEN bo.numero_ore ELSE 0 END) as ore_straordinarie
@@ -47,6 +65,17 @@ class Bank extends Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+    * Aggiunge un'ora alla banca d'ore di un utente.
+    *
+    * @param int $userId ID dell'utente.
+    * @param string $day Giorno.
+    * @param string $type Da recuperare o straordinario.
+    * @param int $count Il totale di ore da aggiungere.
+    * @param string $notes Note.
+    *
+    * @return boolean True se l'aggiunta è andata a buon fine.
+    */
     public function addUserHoursBank($userId, $day, $type, $count, $notes)
     {
         $sql = "insert into banca_ore  (docente, giorno, tipo_ora, numero_ore, nota)
