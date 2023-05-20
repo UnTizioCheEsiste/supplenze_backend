@@ -4,7 +4,7 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 class User extends Database
 {
     /**
-     * Ottieni gli elementi del URI.
+     * Ottieni i dati dell'utente di cui passi l'id.
      * 
      * @param int $userId ID dell'utente.
      * 
@@ -33,7 +33,7 @@ class User extends Database
      */
     public function login($email, $password)
     {
-        // Controllo le credenziali dell'utente
+        // Controllo le credenziali dell'utente con la query alla tabella utente
         $sql = "SELECT id
                 FROM utente
                 WHERE email = :email AND `password` = :password";
@@ -43,6 +43,7 @@ class User extends Database
         $stmt->bindValue(":password", $password, PDO::PARAM_STR);
 
         $stmt->execute();
+        //variabile che contiene l'id dell'utente nella tabella utente
         $pwdLoginNormale = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo la presenza dell'id dell'utente nella tabella reset
@@ -56,13 +57,14 @@ class User extends Database
         $stmt->bindValue(":password", $password, PDO::PARAM_STR);
 
         $stmt->execute();
+        //variabile con l'id dell'utente della tabella reset e le informazioni da reset
         $pwdLoginReset = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo che esista l'user_id, che la data dell'expires sia maggiore del giorno attuale e che la reset non sia completed
         if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["data_scadenza"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completato"] == 0){
-            return $pwdLoginReset["id"];
+            return $pwdLoginReset["id"];//ritorno il dato da reset
         }
-
+        //ritorno il dato dal login iniziale 
         return $pwdLoginNormale;
     }
 
@@ -81,7 +83,7 @@ class User extends Database
         $bytes = random_bytes(5);
         $password = bin2hex($bytes);
 
-
+        //inserisco il record e nel caso avvena con successo l'inserimento ritorno la password altrimenti 0
         $sql = "insert into utente  (nome, cognome, email, `password` , telefono, privilegio)
                 values (:nome, :cognome, :email, :password, :telefono, :privilegio);";
        
@@ -105,7 +107,7 @@ class User extends Database
     }
 
     /**
-     * Cambia password.
+     * Cambia password. 2 scenari o cambio normale (update di user) o cambio successivo a un reset (update di user e di reset)
      * 
      * @param int $userId ID dell'utente.
      * @param string $oldPassword Vecchia password dell'utente.
@@ -113,6 +115,7 @@ class User extends Database
      */
     public function changePassword($userId, $oldPassword, $newPassword)
     {
+        //query per aggiornare la tabella utente con la password inserita
         $sql = "update utente 
                 set utente.`password` = :newPassword
                 where utente.id = :userId and utente.`password` = :oldPassword;";
@@ -123,17 +126,20 @@ class User extends Database
         $stmt->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
 
         $stmt->execute();
-
+        
+        //se la modifica va a buonfine allora le credenziali erano corrette e la password è stata aggiornata
         if($stmt->rowCount()==1)
         {
             return $stmt->rowCount();
+        //altrimenti controllo nella tabella reset
         }else{
+            //in questa query faccio l'update solo se combacia la password nella tabella reset, se non è stata già resettata e se la data attuale è nell'intervallo 
             $sql2="UPDATE utente u
             SET u.password = :newPassword
             WHERE u.id = :userId
-            AND EXISTS (
+            AND EXISTS ( 
             SELECT * FROM reset r
-            WHERE r.id_utente = u.id
+            WHERE r.id_utente = u.id 
             AND r.password = :oldPassword
             AND r.completato  = 0
             AND now()<r.data_scadenza
@@ -146,7 +152,8 @@ class User extends Database
             $stmt2->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
 
             $stmt2->execute();
-
+            
+            //nel caso la query precedente restituisca rowCount 1 allora segnalo che il reset è avvenuto
             if($stmt2->rowCount()==1)
             {
                 $sql3="update reset 
@@ -165,6 +172,12 @@ class User extends Database
         }
     }
 
+    /**
+     * resetta la password aggiungendone una generata casualmente nella tabella reset
+     * @param int $userId l'id dell'utente
+     * @param string $email l'email dell'utente
+     * @return int il numero di righe aggiornate
+     */
     public function resetPassword($userId, $email)
     {
         $bytes = random_bytes(5); // 10 bytes will generate a string of length 20.
