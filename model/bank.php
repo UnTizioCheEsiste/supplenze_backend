@@ -31,10 +31,9 @@ class Bank extends Database
     */
     public function getUserHoursBank($id)
     {
-        $sql = "select concat(u.nome, ' ', u.cognome) as docente, bo.giorno, bo.tipo_ora, bo.numero_ore, bo.nota
-                from banca_ore bo
-                inner join utente u on bo.docente = u.id
-                where u.id = :id;";
+        $sql = "SELECT bo.docente, bo.numero_ore, bo.nota, bo.tipo_ora 
+        FROM banca_ore bo
+        WHERE bo.docente = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
@@ -76,14 +75,13 @@ class Bank extends Database
     *
     * @return boolean True se l'aggiunta è andata a buon fine.
     */
-    public function addUserHoursBank($userId, $day, $type, $count, $notes)
+    public function addUserHoursBank($userId, $type, $count, $notes)
     {
-        $sql = "insert into banca_ore  (docente, giorno, tipo_ora, numero_ore, nota)
-                values (:userId, :day, :type, :count, :notes);";
+        $sql = "insert into banca_ore  (docente, tipo_ora, numero_ore, nota)
+                values (:userId, :type, :count, :notes);";
        
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":userId", $userId, PDO::PARAM_INT);
-        $stmt->bindValue(":day", $day, PDO::PARAM_STR);
         $stmt->bindValue(":type", $type, PDO::PARAM_STR);
         $stmt->bindValue(":count", $count, PDO::PARAM_INT);
         $stmt->bindValue(":notes", $notes, PDO::PARAM_STR);
