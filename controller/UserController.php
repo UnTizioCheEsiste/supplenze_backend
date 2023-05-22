@@ -1,7 +1,7 @@
 <?php
 require_once PROJECT_ROOT_PATH . "/controller/BaseController.php";
 require_once PROJECT_ROOT_PATH . "/model/user.php";
-//INVIO MAIL DA GESTIRE
+//INVIO MAIL CON LIBRERIA PHPMAILER, SE NON C'è DA INSTALLLARE CON COMPOSER E VENDORS
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 // importa la libreria PHPMailer
@@ -10,20 +10,22 @@ require 'vendor/autoload.php';
 
 class UserController extends BaseController
 {
-    private $uri;
+    private $uri;//l'url della api, le rotte sono virtuali (regole nel file htaccess)
 
     public function __construct($uri)
     {
         $this->uri = $uri;
     }
 
-    public function processRequest()
+    public function processRequest()//processo la richiesta sulla base di quello che trovo nello uri
     {
         $user = new User();
 
         switch ($this->uri) {
             case "getUser":
+                //questa è una get, ottengo i parametri tramite il metodo del baseController
                 $params = $this->getQueryStringParams();
+                //controllo che sia presente l'id
                 if(empty($params["id"]))
                 {
                     http_response_code(404);
@@ -31,7 +33,8 @@ class UserController extends BaseController
                     break;
                 }else{
                     $userInfo = $user->getUser($params['id']);
-
+                
+                //controllo che siano presenti dei dati nell'array
                 if (empty($userInfo)) {
                     http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Utente non trovato"]);
@@ -182,6 +185,7 @@ class UserController extends BaseController
                 }
                 break;
             case "getArchiveUser":
+                //prelevo gli utenti dalla query e controllo che l'array non sia vuoto
                 $userInfo = $user->getArchiveUser();
                 
                 if (empty($userInfo)) {
@@ -195,6 +199,7 @@ class UserController extends BaseController
                 break;
             
             case "GetArchiveUserAbsence":
+                //prelevo il parametro della get (l'id dell'utente) e controllo che sia presente 
                 $params = $this->getQueryStringParams();
                 if(!empty($params["id"]))
                 {
@@ -214,7 +219,7 @@ class UserController extends BaseController
                     echo json_encode(["success" => false, "data" => "Id non inserito"]);
                     break;
                 }
-            break;
+            //rotta di prova per l'invio di mail con indirizzo mail fisso di destinazione
             case 'provaEmail':
                 $result=$this->sendMail("pirra.francesco@iisviolamarchesini.edu.it","Prova","Prova email");
                 if($result['status'])
@@ -225,8 +230,17 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * metodo per l'invio di mail con phpmailer con tutti i parametri
+     * @param string $to il destinatario della mail
+     * @param string $subject l'oggetto della mail
+     * @param string $body il corpo della mail
+     * eventualmente aggiungere altre funzioni di phpmailer per formattare meglio la mail 
+     * @return mixed status (true o false con anche l'errore)
+     */
     public function sendMail($to,$subject,$body)
     {
+        //importante al posto di questa ci va una mail della segreteria o del vicepreside, insomma di chi invia le notifiche ai docenti
         $from = 'frapirra123@gmail.com';
         /*
         $to = 'medea.luca@iisviolamarchesini.edu.it';
@@ -241,7 +255,8 @@ class UserController extends BaseController
         $mail->SMTPSecure = 'tls';
         $mail->SMTPAuth = true;
         $mail->Username = 'frapirra123@gmail.com';
-        $mail->Password = 'zikiridqjnvxodhj';
+        //importante l'indirizzo mail deve essere del tipo @gmail.com e non @iisviolamarchesini.edu.it, perchè si usa il server smtp di gmail
+        $mail->Password = 'zikiridqjnvxodhj';//password per le app da generare nell'account (attivare autenticazione 2 fattori)
 
         // imposta le informazioni della email
         $mail->setFrom($from);
@@ -249,6 +264,7 @@ class UserController extends BaseController
         $mail->Subject = $subject;
         $mail->Body = $body;
 
+        //il metodo restituisce uno status che può essere true o false, se è false c'è anche l'errore 
         $response=[];
         // invia la email
         if(!$mail->send()) {

@@ -7,8 +7,7 @@ class User extends Database
      * Ottieni i dati dell'utente di cui passi l'id.
      * 
      * @param int $userId ID dell'utente.
-     * 
-     * @return User
+     * @return User l'utente con l'id inserito
      */
     public function getUser($userId)
     {
@@ -76,6 +75,7 @@ class User extends Database
      * @param string $email Email dell'utente.
      * @param string $telefono Numero di telefono dell'utente.
      * @param int $privilegio Il tipo di privilegio che l'utente avrà.
+     * @return string $password se registrato correttamente altrimenti 0
      */
     public function register($nome, $cognome, $email, $telefono, $privilegio)
     {
@@ -112,6 +112,7 @@ class User extends Database
      * @param int $userId ID dell'utente.
      * @param string $oldPassword Vecchia password dell'utente.
      * @param string $newPassword Nuova password dell'utente.
+     * @return int il numero di righe aggiornate (deve essere 1)
      */
     public function changePassword($userId, $oldPassword, $newPassword)
     {
@@ -168,6 +169,8 @@ class User extends Database
                 $stmt3->execute();
 
                 return $stmt3->rowCount();
+            }else{
+                return 0;
             }
         }
     }
@@ -194,7 +197,10 @@ class User extends Database
 
         return $stmt->rowCount();
     }
-    
+    /**
+     * Restituisce tutta la lista di utenti registrata al software
+     * @return User[] gli utenti con i relativi dati (nome,cognome,email.privilegio,telefono)
+     */
     public function getArchiveUser()
     {
         $sql = "SELECT utente.nome, utente.cognome, utente.email, p.nome as privilegio , utente.telefono
@@ -207,9 +213,14 @@ class User extends Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Ritorna la lista delle assenze fatte da un determinato utente
+     * @param int $id l'id dell'utente 
+     * @return mixed nome dell'utente e: motivo, date, certificato note di ogni assenza
+     */
     public function getArchiveUserAbsence($id)
     {
-        $sql = "SELECT concat(u.nome,' ',u.cognome) as utente, m.nome, a.certificato_medico, a.data_inizio, a.data_fine, a.nota
+        $sql = "SELECT concat(u.nome,' ',u.cognome) as utente, m.nome as motivazione, a.certificato_medico, a.data_inizio, a.data_fine, a.nota
         FROM assenza a 
         inner join utente u on u.id=a.docente
         inner join motivazione m on m.id=a.motivazione

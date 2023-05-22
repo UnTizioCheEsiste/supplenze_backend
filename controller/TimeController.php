@@ -17,22 +17,36 @@ class TimeController extends BaseController
 
         switch ($this->uri) {
             case "getHour":
+                //prelevo i dati dal model e controllo che non siano vuoti
                 $hours = $time->getHour();
+                if (empty($hours)) {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Errore nella restituzione delle ore"]);
+                    break;
+                }
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $hours]);
                 break;
             case "getDay":
+                //prelevo i dati dal model e controllo che non siano vuoti
                 $days = $time->getDay();
+                if (empty($days)) {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Errore nella restituzione dei giorni"]);
+                    break;
+                }
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $days]);
                 break;
             case "getHourById":
+                //prlevo l'id dalla richiesta e controllo che sia stato inserito
                 $params = $this->getQueryStringParams();
                 if(empty($params["id"]))
                 {
                     http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
                 }else{
+                    //prleveo i dati dal model, se l'array non è vuoto lo restituisco altrimenti ritorno un errore
                     $hourInfo = $time->getHourById($params['id']);
 
                     if (empty($hourInfo)) {

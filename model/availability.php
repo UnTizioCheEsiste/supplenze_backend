@@ -4,11 +4,15 @@ require_once PROJECT_ROOT_PATH . "/model/time.php";
 
 class Availability extends Database
 {
-    /* Restituisce tutte le disponibilità temporanee e non, 
-    nel caso sia permanente data inizio e data fine sono null, 
-    nel caso sia temporanea niente è null  */
+    /**
+     *  Restituisce tutte le disponibilità temporanee e non,
+     *  nel caso sia permanente data inizio e data fine sono null, nel caso sia temporanea niente è null 
+     *  @return bool true se va a buon fine
+     * @return int 0 se non va a buon fine
+     * */ 
     public function getArchiveAvailability()
     {
+        //left join con giorno e ora per prelevare anche quelle temporanee
         $sql = "SELECT u.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, d.id as id_disponibilita, 
         d.tipo_disponibilita as id_tipo_disponibilita, td.nome as tipo_disponibilita, d.giorno, d.ora, d.data_inizio, d.data_fine 
                 FROM disponibilita d 
