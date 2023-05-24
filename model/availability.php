@@ -8,7 +8,7 @@ class Availability extends Database
      *  Restituisce tutte le disponibilità temporanee e non,
      *  nel caso sia permanente data inizio e data fine sono null, nel caso sia temporanea niente è null 
      *  @return bool true se va a buon fine
-     * @return int 0 se non va a buon fine
+     *  @return Availability
      * */
     public function getArchiveAvailability()
     {
@@ -35,7 +35,13 @@ class Availability extends Database
         return $result;
     }
 
-    //Mostra la lista dei supplenti disponibili per quel determinato giorno e quella determinata ora
+    /**
+     * Mostra la lista dei supplenti disponibili per quel 
+     * determinato giorno e quella determinata ora
+     * @param string $date = data nel formato YY-mm-dd
+     * @param int $hour = ID dell'ora di lezione
+     * @return Availability disponibilita temporanee + permanenti
+     */
     public function getArchiveAvailabilityHour($date, $hours)
     {
         $time = new Time();
@@ -52,7 +58,7 @@ class Availability extends Database
         from disponibilita d 
         inner join utente u 
         on u.id = d.docente
-        inner join tipo_disponibilita td 
+        inner join tipo_disponibilita td
         on td.id = d.tipo_disponibilita 
         where :startdate between d.data_inizio and d.data_fine
         and :finishdate between d.data_inizio and d.data_fine";
@@ -93,7 +99,15 @@ class Availability extends Database
         return array_merge($result1, $result2);
     }
 
-    // Aggiunge una nuova disponibilita nella tabella disponibilita
+    /**
+     * Aggiunge una nuova disponibilita nella tabella disponibilita
+     * @param int $teacher = Id del docente
+     * @param int $availability_type = ID che specifica il tipo di disponibilita
+     * @param int/string $type1 = può essere la data_inizio oppure l'ID che fa riferimento al giorno
+     * @param int/string $type2 = può essere la data_fine oppure l'ID che fa riferimento all'ora
+     * @param bool $is_date = specifica se type1 e type2 fanno riferimento ad una data o meno
+     * @return bool true se va a buon fine. al contrario ritorna false
+     */
     public function addAvailability($teacher, $availability_type, $type1, $type2, $is_date)
     {
         //type1 può essere data_inizio o giorno
@@ -123,7 +137,11 @@ class Availability extends Database
         return true;
     }
 
-    // Rimuove la disponibilita dato il suo ID
+    /**
+     * Rimuove la disponibilita dato il suo ID
+     * @param int $availability_id = ID della disponibilita
+     * @return bool true se va a buon fine. al contrario ritorna false
+     */
     public function removeAvailability($availability_id)
     {
         $sql = "DELETE FROM disponibilita
@@ -133,10 +151,12 @@ class Availability extends Database
         return $stmt->execute();
     }
 
-    // Mostra la lista dei tipi di disponibilita dalla tabella tipo_disponibilita
+    /**
+     * Mostra la lista dei tipi di disponibilita dalla tabella tipo_disponibilita
+     * @return mixed ID, nome e descrizione relative al tipo disponibilita
+     */
     public function getArchiveTypeAvailability()
     {
-
         $sql = "SELECT id, nome, descrizione
                 FROM tipo_disponibilita
                 WHERE 1=1";
@@ -145,5 +165,4 @@ class Availability extends Database
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
-
 }
