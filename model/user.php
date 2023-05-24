@@ -66,6 +66,7 @@ class User extends Database
         //ritorno il dato dal login iniziale 
         return $pwdLoginNormale;
     }
+    
 
     /**
      * Registra l'utente.
@@ -79,6 +80,10 @@ class User extends Database
      */
     public function register($nome, $cognome, $email, $telefono, $privilegio)
     {
+        //controllo che l'utente non sia già registrato
+        if($this->search($email)!=0){
+            return false;
+        }
         // Generazione di una password casuale
         $bytes = random_bytes(5);
         $password = bin2hex($bytes);
@@ -96,14 +101,24 @@ class User extends Database
         $stmt->bindValue(":privilegio", $privilegio, PDO::PARAM_INT);
 
 
-        if ($stmt->execute())
+        try 
         {
-            return $password;
+            return $stmt->execute();
         }
-        else
+        catch(Exception $e)
         {
-            return 0;
+            return false;
         }
+    }
+
+    //metodo per il controllo delle registrazioni 
+    public function search($email)
+    {
+        $sql="SELECT id FROM utente where utente.email=:email";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":email", $email, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->rowCount();
     }
 
     /**

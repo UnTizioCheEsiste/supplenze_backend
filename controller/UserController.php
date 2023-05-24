@@ -106,10 +106,9 @@ class UserController extends BaseController
                 }
                 
                 //controllo sulla registrazione
-                if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=0)
+                if($user->register($data->nome, $data->cognome, $data->email, $data->telefono, $data->privilegio)!=false)
                 {
-                    $result=$this->sendMail($data->email,"Registrazione alla piattaforma supplenze","
-                    Carissimo utente le confermiamo che la registrazione alla piattaforma per gestire assenze e supplenze è avvenuta correttamente");
+                    $result=$this->sendMail($data->email,"Registrazione alla piattaforma supplenze","Carissimo utente le confermiamo che la registrazione alla piattaforma per gestire assenze e supplenze è avvenuta correttamente");
                     //controllo sull'invio della mail
                     if($result['status'])
                     {
