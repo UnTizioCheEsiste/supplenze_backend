@@ -39,14 +39,14 @@ class TimeController extends BaseController
                 echo json_encode(["success" => true, "data" => $days]);
                 break;
             case "getHourById":
-                //prlevo l'id dalla richiesta e controllo che sia stato inserito
+                //prelevo l'id dalla richiesta e controllo che sia stato inserito
                 $params = $this->getQueryStringParams();
                 if(empty($params["id"]))
                 {
                     http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
                 }else{
-                    //prleveo i dati dal model, se l'array non è vuoto lo restituisco altrimenti ritorno un errore
+                    //prelevo i dati dal model, se l'array non è vuoto lo restituisco altrimenti ritorno un errore
                     $hourInfo = $time->getHourById($params['id']);
 
                     if (empty($hourInfo)) {
