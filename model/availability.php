@@ -48,7 +48,7 @@ class Availability extends Database
 
         /* Trovo i docenti con disponibilita TEMPORANEA che sono liberi quel determinato giorno
          * a quella determinata ora*/
-        $sql1 = "SELECT d.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita 
+        $sql1 = "SELECT u.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita 
         from disponibilita d 
         inner join utente u 
         on u.id = d.docente
@@ -65,13 +65,12 @@ class Availability extends Database
         } catch(Exception $e){
             return 0;
         }
-        
         $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
-        /* Trovo i docenti con disponibilita PERMANENTE che sono liberi quel giorno della settimana
+        /* Trovo i docenti con disponibilita PERMANENTI che sono liberi quel giorno della settimana
          * a quell'ora di lezione */
         $dayofweek = date('w', strtotime($date));
-        $sql2 = "SELECT d.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita
+        $sql2 = "SELECT u.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita
         from disponibilita d 
         inner join utente u 
         on u.id = d.docente
@@ -91,6 +90,7 @@ class Availability extends Database
             return 0;
         }
         $result2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        return array_merge($result1, $result2);
     }
 
     // Aggiunge una nuova disponibilita nella tabella disponibilita
