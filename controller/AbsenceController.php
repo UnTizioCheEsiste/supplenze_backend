@@ -250,6 +250,8 @@ class AbsenceController extends BaseController
                     echo json_encode(["success" => true, "data" => $success]);
                     break;
                 }
+            case 'removeAbsence':
+                break;
         }
     }
 }

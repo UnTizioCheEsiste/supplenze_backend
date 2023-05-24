@@ -246,4 +246,42 @@ class User extends Database
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    /**
+     * attiva un utente mettendo il campo active a 1
+     * @param int $id l'id dell'utente
+     * @return bool true o false
+     */
+    public function activateUser($id)
+    {
+        //aggiungere campo active al db e modificare tutte le query controllandone questo parametro
+        $sql = "UPDATE utente
+        SET utente.active=1
+        WHERE utente.id=:id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function removeUser($id)
+    {
+        $sql = "UPDATE utente
+        SET utente.active=0
+        WHERE utente.id=:id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function deleteUser($id)
+    {
+        $sql = "DELETE 
+        FROM utente
+        WHERE utente.id=:id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }
