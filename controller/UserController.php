@@ -63,7 +63,7 @@ class UserController extends BaseController
                 $userId = $user->login($email, $password);
 
                 //se non ricevo risultati seganlo l'errore
-                if ($userId < 0) {
+                if (!$userId) {
                     http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Credenziali errate"]);
                     break;
@@ -169,6 +169,7 @@ class UserController extends BaseController
                     $result=$this->sendMail($data->email, $subject,$body);
                     
                     //controllo sull'invio della mail
+                    var_dump($result['status']);
                     if($result['status'])
                     {
                         http_response_code(200);
@@ -316,7 +317,8 @@ class UserController extends BaseController
         //il metodo restituisce uno status che può essere true o false, se è false c'è anche l'errore 
         $response=[];
         // invia la email
-        if(!$mail->send()) {
+        $sended = $mail->send();
+        if(!$sended) {
             $response['status'] = false;
             $response['error'] = $mail->ErrorInfo;
         } else {
