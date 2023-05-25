@@ -24,7 +24,7 @@ class Availability extends Database
                 on o.id = d.ora
                 left join utente u 
                 on u.id = d.docente 
-                WHERE 1=1";
+                WHERE u.attivo=1";
         $stmt = $this->conn->prepare($sql);
         try {
             $stmt->execute();
@@ -61,7 +61,7 @@ class Availability extends Database
         inner join tipo_disponibilita td
         on td.id = d.tipo_disponibilita 
         where :startdate between d.data_inizio and d.data_fine
-        and :finishdate between d.data_inizio and d.data_fine";
+        and :finishdate between d.data_inizio and d.data_fine and u.attivo=1";
 
         $stmt1 = $this->conn->prepare($sql1);
         $stmt1->bindValue(":startdate", $start_date, PDO::PARAM_STR);

@@ -12,6 +12,7 @@ create table dbmuybgxgpjqvi.utente (
 	privilegio int not null,
 	telefono nvarchar(10) not null,
 	password nvarchar(30) not null,
+	attivo boolean not null default 1,
 	foreign key (privilegio) references privilegio(id)
 );
 create table dbmuybgxgpjqvi.giorno (
