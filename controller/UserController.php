@@ -226,9 +226,55 @@ class UserController extends BaseController
                 else
                     echo 'Errore durante l\'invio della email: ' . $result["error"];
                 break;
+            //pone il campo active=0
             case 'removeUser':
+                $params = $this->getQueryStringParams();
+                if(empty($params["id"]))
+                {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Id non inserito"]);
+                    break;
+                }
+                if($result=$user->removeUser($params["id"])){
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $result]);
+                }else{
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
+                }
                 break;
             case 'activateUser':
+                $params = $this->getQueryStringParams();
+                if(empty($params["id"]))
+                {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Id non inserito"]);
+                    break;
+                }
+                if($result=$user->activateUser($params["id"])){
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $result]);
+                }else{
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
+                }
+                break;
+            //elimina l'utente dalla tabella user 
+            case 'deleteUser':
+                $params = $this->getQueryStringParams();
+                if(empty($params["id"]))
+                {
+                    http_response_code(404);
+                    echo json_encode(["success" => false, "data" => "Id non inserito"]);
+                    break;
+                }
+                if($result=$user->deleteUser($params["id"])){
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => $result]);
+                }else{
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
+                }
                 break;
         }
     }

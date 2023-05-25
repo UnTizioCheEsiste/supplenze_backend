@@ -255,7 +255,7 @@ class User extends Database
     {
         //aggiungere campo active al db e modificare tutte le query controllandone questo parametro
         $sql = "UPDATE utente
-        SET utente.active=1
+        SET utente.attivo=1
         WHERE utente.id=:id";
 
         $stmt = $this->conn->prepare($sql);
@@ -263,10 +263,15 @@ class User extends Database
         return $stmt->execute();
     }
 
+    /**
+     * disattiva un utente mettendo il campo active a 0
+     * @param int $id l'id dell'utente
+     * @return bool true o false
+     */
     public function removeUser($id)
     {
         $sql = "UPDATE utente
-        SET utente.active=0
+        SET utente.attivo=0
         WHERE utente.id=:id";
 
         $stmt = $this->conn->prepare($sql);
@@ -274,6 +279,11 @@ class User extends Database
         return $stmt->execute();
     }
 
+    /**
+     * elimina un utente dal database
+     * @param int $id l'id dell'utente
+     * @return bool true o false
+     */
     public function deleteUser($id)
     {
         $sql = "DELETE 
