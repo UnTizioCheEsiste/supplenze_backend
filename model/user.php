@@ -35,7 +35,7 @@ class User extends Database
         // Controllo le credenziali dell'utente con la query alla tabella utente
         $sql = "SELECT id
                 FROM utente
-                WHERE email = :email AND `password` = :password";
+                WHERE email = :email AND `password` = :password AND attivo=1";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":email", $email, PDO::PARAM_STR);
@@ -49,7 +49,7 @@ class User extends Database
         $sql = "SELECT r.id_utente  AS id, r.data_scadenza, r.completato
                 FROM `reset` r
                 INNER JOIN utente u ON u.id = r.id_utente
-                WHERE u.email = :email AND r.`password` = :password";
+                WHERE u.email = :email AND r.`password` = :password AND u.attivo=1";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":email", $email, PDO::PARAM_STR);
@@ -132,7 +132,7 @@ class User extends Database
     public function changePassword($userId, $oldPassword, $newPassword)
     {
         //query per aggiornare la tabella utente con la password inserita
-        $sql = "update utente 
+        $sql = "UPDATE utente 
                 set utente.`password` = :newPassword
                 where utente.id = :userId and utente.`password` = :oldPassword;";
 
@@ -172,7 +172,7 @@ class User extends Database
             //nel caso la query precedente restituisca rowCount 1 allora segnalo che il reset è avvenuto
             if($stmt2->rowCount()==1)
             {
-                $sql3="update reset 
+                $sql3="UPDATE reset 
                 set reset.completed=1
                 where reset.id_utente=:id_utente";
             
@@ -201,7 +201,7 @@ class User extends Database
         $bytes = random_bytes(5); // 10 bytes will generate a string of length 20.
         $password = bin2hex($bytes); // converts binary data to hexadecimal representation
 
-        $sql = "insert into reset(id_utente, `password`)
+        $sql = "INSERT INTO reset(id_utente, `password`)
                 values (:userId, :password);";
 
         $stmt = $this->conn->prepare($sql);
@@ -221,7 +221,7 @@ class User extends Database
         $sql = "SELECT utente.nome, utente.cognome, utente.email, p.nome as privilegio , utente.telefono
         FROM utente
         inner join privilegio p on p.id=utente.privilegio
-        WHERE 1=1";
+        WHERE utente.attivo = 1";
 
         $stmt = $this->conn->prepare($sql);
         $result = $stmt->execute();
@@ -239,7 +239,7 @@ class User extends Database
         FROM assenza a 
         inner join utente u on u.id=a.docente
         inner join motivazione m on m.id=a.motivazione
-        WHERE u.id=:id";
+        WHERE u.id=:id and u.attivo = 1";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
