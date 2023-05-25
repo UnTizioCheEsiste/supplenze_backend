@@ -226,6 +226,10 @@ class UserController extends BaseController
                 else
                     echo 'Errore durante l\'invio della email: ' . $result["error"];
                 break;
+            case 'removeUser':
+                break;
+            case 'activateUser':
+                break;
         }
     }
 

@@ -367,4 +367,15 @@ class Absence extends Database
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function removeAbsence($id)
+    {
+        $sql = "DELETE 
+        FROM assenza
+        WHERE assenza.id=:id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }
