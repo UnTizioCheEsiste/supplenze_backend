@@ -3,10 +3,19 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 
 class Substitution extends Database
 {
-    public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note){ // da retribuire
-        //L’api aggiunge il sostituto alla lezione. “non necessaria” serve per 
-        //indicare se la lezione ha necessità di avere il supplente o meno
-
+    /**
+     * Aggiunge il supplente alla lezione
+     * @param int $id_absence ID dell'assenza
+     * @param int $id_user ID del supplente
+     * @param bool $not_necessary serve per indicare se la lezione ha necessità di avere il supplente o meno
+     * @param bool $to_pay indica se la supplenza è da retribuire 
+     * @param int $hour ID dell'ora di lezione
+     * @param string $substitution_date indica la data della supplenza
+     * @param string $note indica la descrizione relativa alla supplenza
+     * @return bool ritorna 1 se va a buon fine, altrimenti 0
+     */
+    public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note)
+    {
         $sql = "INSERT INTO supplenza (assenza, supplente, non_necessaria, da_retribuire, ora, data_supplenza, nota)
                 VALUES (:id_absence, :id_user, :not_necessary, :to_pay, :hourr, :substitution_date, :note)";
         $stmt = $this->conn->prepare($sql);
@@ -17,23 +26,20 @@ class Substitution extends Database
         $stmt->bindValue(":hourr", $hour, PDO::PARAM_INT);
         $stmt->bindValue(":substitution_date", $substitution_date, PDO::PARAM_STR);
         $stmt->bindValue(":note", $note, PDO::PARAM_STR);
-        if ($stmt->execute()) //se esegue allora si restituisce true per poi controllare la corretta esecuzione
-        {
-            return true;
-        }
-        else
-        {
-            return false;
+
+        try {
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return 0;
         }
     }
 
-    // public function addSubstituteTeaching(){ // Aggiunge una disponibilità per fare supplenza
-    //     ID User, giorno (della settimana), ora (della lezione), tipo ora (ora buca, compresenza…)
-
-    // }
-
-    public function getArchiveSubstitution() { 
-        // Restituisce la lista delle supplenze. Assente e supplente sono delle concatenazioni di nome e cognome
+    /**
+     * Restituisce la lista delle supplenze
+     * @return Substitution tutte le informazioni relative alla supplenza
+     */
+    public function getArchiveSubstitution()
+    {
         $sql = "SELECT s.id, CONCAT(u1.nome, ' ', u1.cognome) as assente, 
         CONCAT(u2.nome, ' ', u2.cognome) as supplente, 
         CONCAT(o.data_inizio, ' - ', o.data_fine) as ora, s.da_retribuire
@@ -57,8 +63,13 @@ class Substitution extends Database
         return $archivesub;
     }
 
-    public function getArchiveUserSubstitution($id_user) {
-        // Restituisce tutte le supplenze fatte da un docente
+    /**
+     * Restituisce tutte le supplenze fatte da un docente
+     * @param int $id_user ID del docente
+     * @return Substitution tutte le informazioni utili relative alla supplenza
+     */
+    public function getArchiveUserSubstitution($id_user)
+    {
         $sql = "SELECT s.id, CONCAT(o.data_inizio, ' - ', o.data_fine) as ora, s.nota, s.da_retribuire
         FROM supplenza s
         INNER JOIN ora o
@@ -72,15 +83,25 @@ class Substitution extends Database
         return $archiveUserSub;
     }
 
+    /**
+     * Restituisce tutte le supplenze fatte da un docente
+     * @param int $id ID della supplenza
+     * @return bool ritorna 1 se va a buon fine, altrimenti 0
+     */
     public function removeSubstitution($id)
     {
         $sql = "DELETE
         from supplenza
-        WHERE id=:id";
+        WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        return $stmt->execute();
+        try {
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return 0;
+        }
+
     }
 
 }

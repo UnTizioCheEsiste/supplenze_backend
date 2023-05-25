@@ -8,7 +8,7 @@ class Availability extends Database
      *  Restituisce tutte le disponibilità temporanee e non,
      *  nel caso sia permanente data inizio e data fine sono null, nel caso sia temporanea niente è null 
      *  @return bool true se va a buon fine
-     *  @return Availability
+     *  @return Availability tutte le informazioni relative alla disponibilita
      * */
     public function getArchiveAvailability()
     {
@@ -101,11 +101,11 @@ class Availability extends Database
 
     /**
      * Aggiunge una nuova disponibilita nella tabella disponibilita
-     * @param int $teacher = Id del docente
-     * @param int $availability_type = ID che specifica il tipo di disponibilita
-     * @param int/string $type1 = può essere la data_inizio oppure l'ID che fa riferimento al giorno
-     * @param int/string $type2 = può essere la data_fine oppure l'ID che fa riferimento all'ora
-     * @param bool $is_date = specifica se type1 e type2 fanno riferimento ad una data o meno
+     * @param int $teacher  ID del docente
+     * @param int $availability_type  ID che specifica il tipo di disponibilita
+     * @param string $type1 può essere la data_inizio oppure l'ID che fa riferimento al giorno
+     * @param string $type2 può essere la data_fine oppure l'ID che fa riferimento all'ora
+     * @param bool $is_date specifica se type1 e type2 fanno riferimento ad una data o meno
      * @return bool true se va a buon fine. al contrario ritorna false
      */
     public function addAvailability($teacher, $availability_type, $type1, $type2, $is_date)
@@ -139,7 +139,7 @@ class Availability extends Database
 
     /**
      * Rimuove la disponibilita dato il suo ID
-     * @param int $availability_id = ID della disponibilita
+     * @param int $availability_id ID della disponibilita
      * @return bool true se va a buon fine. al contrario ritorna false
      */
     public function removeAvailability($availability_id)
