@@ -1,7 +1,7 @@
 <?php
 require_once PROJECT_ROOT_PATH . "/controller/BaseController.php";
 require_once PROJECT_ROOT_PATH . "/model/user.php";
-//INVIO MAIL CON LIBRERIA PHPMAILER, SE NON C'è DA INSTALLLARE CON COMPOSER E VENDORS
+//INVIO MAIL CON LIBRERIA PHPMAILER, SE NON C'E' DA INSTALLARE CON COMPOSER E VENDORS
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 // importa la libreria PHPMailer

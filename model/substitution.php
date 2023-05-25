@@ -90,17 +90,35 @@ class Substitution extends Database
      */
     public function removeSubstitution($id)
     {
+        // Ritorno l'email del docente per poi inviare l'email 
+        $sql1 = "SELECT u.email
+        from utente u
+        inner join supplenza s
+        on s.supplente = u.id
+        where s.id = :id";
+
+        $stmt1 = $this->conn->prepare($sql1);
+        $stmt1->bindValue(":id", $id, PDO::PARAM_INT);
+        try{
+            $stmt1->execute();
+        } catch (Exception $e){
+            return 0;
+        }
+        $email = $stmt1->fetch(PDO::FETCH_ASSOC);
+
+        // Elimino la supplenza
         $sql = "DELETE
-        from supplenza
-        WHERE id = :id";
+        from supplenza s
+        WHERE s.id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         try {
-            return $stmt->execute();
+            $stmt->execute();
         } catch (Exception $e) {
             return 0;
         }
+        return $email;
 
     }
 
