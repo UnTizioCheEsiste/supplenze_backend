@@ -5,6 +5,7 @@ require_once PROJECT_ROOT_PATH . "/model/user.php";
 //INVIO MAIL CON LIBRERIA PHPMAILER, SE NON C'E' DA INSTALLARE CON COMPOSER E VENDORS
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 // importa la libreria PHPMailer
 require 'vendor/autoload.php';
 require_once PROJECT_ROOT_PATH . "/controller/UserController.php";
@@ -97,23 +98,28 @@ class SubstitutionController extends BaseController
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $archiveUserSub]);
                 break;
-            case 'removeSubstitution':
+            case "removeSubstitution":
                 $params = $this->getQueryStringParams();
 
-                if(empty($params["id"])){
+                if (empty($params["id"])) {
                     http_response_code(400);
                     echo json_encode(["success" => false, "data" => "Non è presente l'id"]);
                     break;
                 }
                 $email = $sub->removeSubstitution($params["id"]);
 
+                if (empty($email["email"])) {
+                    http_response_code(200);
+                    echo json_encode(["success" => true, "data" => "Supplenza correttamente rimossa"]);
+                    break;
+                }
+
                 // Invio della mail al docente per comunicare la deselezione della supplenza
                 $userController = new UserController(1);
-                $sendEmail = $userController->sendMail(json_decode($email), "Riassegnazione supplenza", "Le comunichiamo che una supplenza è stata riassegnata. Controlla le supplenze.");
+                $result = $userController->sendMail($email["email"], "Rimozione supplenza del " . $email["data_supplenza"], "Le comunichiamo che la supplenza del " . $email["data_supplenza"] . " dalle " . $email["data_inizio"] . " alle " . $email["data_fine"] . " è stata rimossa.");
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => "Email inviata"]);
                 break;
-
         }
     }
 }

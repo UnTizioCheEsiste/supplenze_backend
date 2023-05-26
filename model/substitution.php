@@ -86,40 +86,33 @@ class Substitution extends Database
     /**
      * Restituisce tutte le supplenze fatte da un docente
      * @param int $id ID della supplenza
-     * @return bool ritorna 1 se va a buon fine, altrimenti 0
+     * @return string ritorna l'email
      */
     public function removeSubstitution($id)
     {
         // Ritorno l'email del docente per poi inviare l'email 
-        $sql1 = "SELECT u.email
+        $sql1 = "SELECT u.email, s.data_supplenza, o.data_inizio, o.data_fine 
         from utente u
         inner join supplenza s
         on s.supplente = u.id
+        inner join ora o 
+        on o.id = s.ora 
         where s.id = :id";
 
         $stmt1 = $this->conn->prepare($sql1);
         $stmt1->bindValue(":id", $id, PDO::PARAM_INT);
-        try{
-            $stmt1->execute();
-        } catch (Exception $e){
-            return 0;
-        }
+        $stmt1->execute();
         $email = $stmt1->fetch(PDO::FETCH_ASSOC);
 
         // Elimino la supplenza
         $sql = "DELETE
-        from supplenza s
-        WHERE s.id = :id";
+        from supplenza
+        WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        try {
-            $stmt->execute();
-        } catch (Exception $e) {
-            return 0;
-        }
+        $stmt->execute();
         return $email;
-
     }
 
 }
