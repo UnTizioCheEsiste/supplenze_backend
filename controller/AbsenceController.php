@@ -251,6 +251,7 @@ class AbsenceController extends BaseController
                     break;
                 }
             case 'removeAbsence':
+                
                 break;
         }
     }

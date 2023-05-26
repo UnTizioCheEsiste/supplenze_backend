@@ -29,7 +29,7 @@ class SubstitutionController extends BaseController
                 $data = json_decode($json);
 
                 // Controllo presenza parametri necessari
-                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria)) {
+                if (empty($data->assenza) || empty($data->supplente) || empty($data->ora) || !is_int($data->da_retribuire) || !is_int($data->non_necessaria) || empty($data->data_supplenza)) {
                     http_response_code(401);
                     echo json_encode(["success" => false, "data" => "Non sono presenti tutti gli attributi"]);
                     break;
@@ -40,13 +40,9 @@ class SubstitutionController extends BaseController
                 $not_necessary = $data->non_necessaria;
                 $to_pay = $data->da_retribuire;
                 $hour = $data->ora;
+                $substitution_date = $data->data_supplenza;
 
                 // Nel caso i parametri opzionali non fossero presenti viene assegnato un valore stringa vuota
-                if (empty($data->data_supplenza)) {
-                    $substitution_date = "";
-                } else {
-                    $substitution_date = $data->data_supplenza;
-                }
                 if (empty($data->nota)) {
                     $note = "";
                 } else {
@@ -57,19 +53,18 @@ class SubstitutionController extends BaseController
                 // Aggiunta delle supplenze
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
 
-                // Se la supplenza non viene assegnata
-                if (!$newSubstitute) {
+                if(empty($newSubstitute["email"])){
                     http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Operazione non completata"]);
+                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
                     break;
                 }
 
+                $userController = new UserController(1);
+                $result = $userController->sendMail($newSubstitute["email"], "Aggiunta supplenza del " . $newSubstitute["data_supplenza"], "Le comunichiamo che le è stata assegnata una supplenza il giorno " . $newSubstitute["data_supplenza"] . " dalle " . $newSubstitute["data_inizio"] . " alle " . $newSubstitute["data_fine"] . ".");
                 // Se tutto è andato a buon fine
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => "Riga aggiunta con successo"]);
                 break;
-            // case "addSubtituteTeaching":
-            //     break;
             case "getArchiveSubstitution":
                 // Ottenimento delle supplenze
                 $archiveSub = $sub->getArchiveSubstitution();

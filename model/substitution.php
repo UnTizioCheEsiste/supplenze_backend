@@ -12,7 +12,7 @@ class Substitution extends Database
      * @param int $hour ID dell'ora di lezione
      * @param string $substitution_date indica la data della supplenza
      * @param string $note indica la descrizione relativa alla supplenza
-     * @return bool ritorna 1 se va a buon fine, altrimenti 0
+     * @return string ritorna 1 se va a buon fine, altrimenti 0
      */
     public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note)
     {
@@ -28,10 +28,34 @@ class Substitution extends Database
         $stmt->bindValue(":note", $note, PDO::PARAM_STR);
 
         try {
-            return $stmt->execute();
+            $stmt->execute();
         } catch (Exception $e) {
-            return 0;
+            return $e;
         }
+
+        $sql1 = "SELECT u.email, s.data_supplenza, o.data_inizio, o.data_fine
+        FROM supplenza s
+        inner join utente u
+        on s.supplente = u.id
+        inner join ora o
+        on o.id = s.ora
+        where s.assenza = :id_absence
+        and s.ora = :hourr
+        and s.data_supplenza = :substitution_date
+        and s.supplente = :id_absence";
+
+        $stmt1 = $this->conn->prepare($sql1);
+        $stmt1->bindValue(":id_absence", $id_absence, PDO::PARAM_INT);
+        $stmt1->bindValue(":id_user", $id_user, PDO::PARAM_INT);
+        $stmt1->bindValue(":hourr", $hour, PDO::PARAM_INT);
+        $stmt1->bindValue(":substitution_date", $substitution_date, PDO::PARAM_STR);
+        try {
+            $stmt1->execute();
+        } catch (Exception $e) {
+            return $e;
+        }
+        $result = $stmt1->fetch(PDO::FETCH_ASSOC);
+        return $result;
     }
 
     /**
