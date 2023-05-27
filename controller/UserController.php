@@ -169,7 +169,7 @@ class UserController extends BaseController
                     $result=$this->sendMail($data->email, $subject,$body);
                     
                     //controllo sull'invio della mail
-                    var_dump($result['status']);
+                    //var_dump($result['status']);
                     if($result['status'])
                     {
                         http_response_code(200);
@@ -290,6 +290,21 @@ class UserController extends BaseController
      */
     public function sendMail($to,$subject,$body)
     {
+        $response=[];
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL))
+        {
+            $atPos = mb_strpos($to, '@');
+            $domain = mb_substr($to, $atPos + 1);
+            if (!checkdnsrr($domain . '.', 'MX')) 
+            {
+                $response['status'] = false;
+                $response['error'] = "Email non valida";
+                return $response;
+            }
+            $response['status'] = false;
+            $response['error'] = "Email non valida";
+            return $response;
+        }
         //importante al posto di questa ci va una mail della segreteria o del vicepreside, insomma di chi invia le notifiche ai docenti
         $from = 'frapirra123@gmail.com';
         /*
@@ -307,7 +322,6 @@ class UserController extends BaseController
         $mail->Username = 'frapirra123@gmail.com';
         //importante l'indirizzo mail deve essere del tipo @gmail.com e non @iisviolamarchesini.edu.it, perchè si usa il server smtp di gmail
         $mail->Password = 'zikiridqjnvxodhj';//password per le app da generare nell'account (attivare autenticazione 2 fattori)
-
         // imposta le informazioni della email
         $mail->setFrom($from);
         $mail->addAddress($to);
@@ -315,7 +329,17 @@ class UserController extends BaseController
         $mail->Body = $body;
 
         //il metodo restituisce uno status che può essere true o false, se è false c'è anche l'errore 
-        $response=[];
+        //$mail->SMTPDebug = 2;
+            /*if ($mail->getSMTPInstance()) {
+                echo json_encode($mail->getSMTPInstance()->getError());
+            }*/
+        // verifica se l'indirizzo email del destinatario è valido
+        if(!$mail->validateAddress($to)) {
+            $response['status'] = false;
+            $response['error'] = "L'indirizzo email del destinatario è valido";
+            return $response;
+        }
+
         // invia la email
         $sended = $mail->send();
         if(!$sended) {
