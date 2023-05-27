@@ -44,26 +44,24 @@ class SubstitutionController extends BaseController
 
                 // Nel caso i parametri opzionali non fossero presenti viene assegnato un valore stringa vuota
                 if (empty($data->nota)) {
-                    $note = "";
+                    $note = " ";
                 } else {
                     $note = $data->nota;
                 }
-
-
+                
                 // Aggiunta delle supplenze
                 $newSubstitute = $sub->addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note);
-
-                if(empty($newSubstitute["email"])){
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
-                    break;
-                }
-
                 $userController = new UserController(1);
+                echo var_dump($newSubstitute);
                 $result = $userController->sendMail($newSubstitute["email"], "Aggiunta supplenza del " . $newSubstitute["data_supplenza"], "Le comunichiamo che le è stata assegnata una supplenza il giorno " . $newSubstitute["data_supplenza"] . " dalle " . $newSubstitute["data_inizio"] . " alle " . $newSubstitute["data_fine"] . ".");
                 // Se tutto è andato a buon fine
+                if($result['status']){
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'invio della email"]);
+                    break;
+                }
                 http_response_code(200);
-                echo json_encode(["success" => true, "data" => "Riga aggiunta con successo"]);
+                echo json_encode(["success" => true, "data" => "Riga aggiunta con successo. Email inviata"]);
                 break;
             case "getArchiveSubstitution":
                 // Ottenimento delle supplenze
@@ -112,6 +110,12 @@ class SubstitutionController extends BaseController
                 // Invio della mail al docente per comunicare la deselezione della supplenza
                 $userController = new UserController(1);
                 $result = $userController->sendMail($email["email"], "Rimozione supplenza del " . $email["data_supplenza"], "Le comunichiamo che la supplenza del " . $email["data_supplenza"] . " dalle " . $email["data_inizio"] . " alle " . $email["data_fine"] . " è stata rimossa.");
+            
+                if($result['status'] == false){
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "data" => "Errore nell'invio della email"]);
+                    break;
+                }
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => "Email inviata"]);
                 break;
