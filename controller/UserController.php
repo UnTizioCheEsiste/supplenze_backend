@@ -181,7 +181,7 @@ class UserController extends BaseController
                 }else{
                     //messaggio errore
                     http_response_code(400);
-                    echo json_encode(["success" => false, "data" => "Errore nella modifica della password."]);
+                    echo json_encode(["success" => false, "data" => "Errore nel reset della password."]);
                 }
                 break;
             case "getArchiveUser":
