@@ -41,11 +41,10 @@ class TimeController extends BaseController
             case "getHourById":
                 //prelevo l'id dalla richiesta e controllo che sia stato inserito
                 $params = $this->getQueryStringParams();
-                if(empty($params["id"]))
-                {
+                if (empty($params["id"])) {
                     http_response_code(404);
                     echo json_encode(["success" => false, "data" => "Parametro non inserito"]);
-                }else{
+                } else {
                     //prelevo i dati dal model, se l'array non è vuoto lo restituisco altrimenti ritorno un errore
                     $hourInfo = $time->getHourById($params['id']);
 
@@ -58,6 +57,10 @@ class TimeController extends BaseController
                     http_response_code(200);
                     echo json_encode(["success" => true, "data" => $hourInfo]);
                 }
+                break;
+            default:
+                http_response_code(400);
+                echo json_encode("Route not found");
                 break;
         }
     }

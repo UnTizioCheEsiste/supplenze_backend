@@ -15,22 +15,13 @@ class Absence extends Database
                 FROM assenza a
                 INNER JOIN utente u ON u.id = a.docente
                 WHERE 1=1";
-       
+
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
 
 
         $absences = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $absences;
-
-        /* Get delle supplenze
-        $sql = "SELECT id,assenza
-                FROM supplenza
-                WHERE 1 = 1";
-       
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        $substitutions = $stmt->fetchAll(PDO::FETCH_ASSOC);*/
     }
 
     /**
@@ -46,7 +37,7 @@ class Absence extends Database
                 FROM assenza a
                 INNER JOIN utente u ON u.id = a.docente
                 WHERE a.id=:id";
-       
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -69,7 +60,7 @@ class Absence extends Database
         $sql = "SELECT *
                 FROM assenza
                 WHERE id = :id";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -90,18 +81,15 @@ class Absence extends Database
         $data_fine = explode(" ", $absence["data_fine"]);
 
         $time = new Time();
-        $hours = $time->getHour();//oggetto che contiene tutte le ore del database con i rwlativi id, inizio e fine
+        $hours = $time->getHour(); //oggetto che contiene tutte le ore del database con i rwlativi id, inizio e fine
 
         // Se l'assenza rientra in un giorno, ovvero data inizio e fine sono uguali e la differenza di ore è minore di 5 ore e mezza
-        if ($data_inizio[0] === $data_fine[0] && $dateDifference->h === "5" && $dateDifference->i === "30")
-        {
+        if ($data_inizio[0] === $data_fine[0] && $dateDifference->h === "5" && $dateDifference->i === "30") {
             //variabile che conterrà l'id dell'ora dato che siamo nel caso di assenze singola ora o ore multiple(comunque spezzate in singole)
             $hourId = 0;
-            foreach ($hours as $hour)
-            {
+            foreach ($hours as $hour) {
                 // Se l'ora di inizio e di fine combaciano con un'ora della tabella "ora"
-                if ($hour["data_inizio"] === $data_inizio[1] && $hour["data_fine"] === $data_fine[1])
-                {
+                if ($hour["data_inizio"] === $data_inizio[1] && $hour["data_fine"] === $data_fine[1]) {
                     // hourId prende l'id di quell'ora
                     $hourId = $hour["id"];
                     break;
@@ -111,44 +99,41 @@ class Absence extends Database
             // Insert dell'assenza singola ora nella tabella supplenze, dato che dovrà essere coperta
             $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
                     VALUES (:assenza, :ora, :data_supplenza)";
-                
+
             $stmt = $this->conn->prepare($sql);
             $stmt->bindValue(':assenza', $id, PDO::PARAM_INT);
             $stmt->bindValue(':ora', $hourId, PDO::PARAM_STR);
             $stmt->bindValue(':data_supplenza', $data_inizio[0], PDO::PARAM_STR);
-            $exc=$stmt->execute();
-            
-            if(!$exc) return false;//se non va a buon fine la query
-        }
-        else //nel caso in cui sia una assenza di un giorno intero o di più giorni
+            $exc = $stmt->execute();
+
+            if (!$exc) return false; //se non va a buon fine la query
+        } else //nel caso in cui sia una assenza di un giorno intero o di più giorni
         {
             //creare un array con i giorni dalla data di inizio alla data di fine
             //ciclo dove cicli i giorni e poi cicli le ore (nested) in cui fai insert into supplenze 
-            $current_date=strtotime($data_inizio[0]);//data del primo giorno (alla posizaione 0 di data_inizio c'è la data percè precedentemente ho fatto lo split)
-            $last_date=strtotime($data_fine[0]);//data dell'ultimo giorno
+            $current_date = strtotime($data_inizio[0]); //data del primo giorno (alla posizaione 0 di data_inizio c'è la data percè precedentemente ho fatto lo split)
+            $last_date = strtotime($data_fine[0]); //data dell'ultimo giorno
 
             //vado a creare un array con le date dalla prima all'ultima
-            $date_array=array();
-            while($current_date<=$last_date){
-                $date_array[]=date('Y-m-d',$current_date);
-                $current_date=strtotime("+1 day",$current_date);
+            $date_array = array();
+            while ($current_date <= $last_date) {
+                $date_array[] = date('Y-m-d', $current_date);
+                $current_date = strtotime("+1 day", $current_date);
             }
 
-            $insertCounter=0;//controllo se le ore inserite sono quelle effettivamente da coprire
-            foreach($date_array as $day)
-            {
-                foreach($hours as $hour)
-                {
+            $insertCounter = 0; //controllo se le ore inserite sono quelle effettivamente da coprire
+            foreach ($date_array as $day) {
+                foreach ($hours as $hour) {
                     $sql = "INSERT INTO supplenza (assenza, ora, data_supplenza)
                     VALUES (:assenza, :ora, :data_supplenza)";
-                
+
                     $stmt = $this->conn->prepare($sql);
                     $stmt->bindValue(':assenza', $id, PDO::PARAM_INT);
                     $stmt->bindValue(':ora', $hour["id"], PDO::PARAM_STR);
                     $stmt->bindValue(':data_supplenza', $day, PDO::PARAM_STR);
 
                     $exc = $stmt->execute();
-                    $exc ? $insertCounter++ : null;//se ho eseguito incremento il counter, se c'è un errore non lo incremento
+                    $exc ? $insertCounter++ : null; //se ho eseguito incremento il counter, se c'è un errore non lo incremento
 
                     if (!$exc) return false; //se non ho eseguito ritorno false
                 }
@@ -156,7 +141,6 @@ class Absence extends Database
             }
             return count($hours) + count($date_array) === $insertCounter; //se il counter non è uguale alla somma delle ore e dei giorni ritorno false
         }
-
     }
 
     /**
@@ -175,8 +159,7 @@ class Absence extends Database
     {
         $time = new Time();
 
-        if (count($hours) === 1) 
-        {
+        if (count($hours) === 1) {
             // Ora inizio assenza
             $hour = $time->getHourById($hours[0]);
 
@@ -187,7 +170,7 @@ class Absence extends Database
             // Insert dell'assenza
             $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
             VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
-    
+
             $stmt = $this->conn->prepare($sql);
             $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
             $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
@@ -209,16 +192,14 @@ class Absence extends Database
             $st->bindValue(':ora', $hours[0], PDO::PARAM_INT);
             $st->bindValue('data_supplenza', $date, PDO::PARAM_STR);
 
-            return $exc && $st->execute();//true se entrambe le query sono andate a buon fine
-        } 
-        else //se ho più ore passo un vettore di ore dal frontend ma nelle tabelle devono essere divise e inserite come righe singole
+            return $exc && $st->execute(); //true se entrambe le query sono andate a buon fine
+        } else //se ho più ore passo un vettore di ore dal frontend ma nelle tabelle devono essere divise e inserite come righe singole
         {
             // Variabile per il controllo del corretto inserimento
             $insertCounter = 0;
 
             // Ciclo per le ore di assenza (è un vettore)
-            foreach ($hours as $h) 
-            {
+            foreach ($hours as $h) {
                 // Ora inizio assenza, la ottengo tramite il vettore di id ($hours) passato al metodo
                 $hour = $time->getHourById($h);
 
@@ -229,7 +210,7 @@ class Absence extends Database
                 // Insert dell'assenza
                 $sql = "INSERT INTO assenza (docente, motivazione, certificato_medico, data_inizio, data_fine, nota)
                 VALUES (:id, :motivo, :certificato, :data_inizio, :data_fine, :nota)";
-    
+
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
                 $stmt->bindValue(':motivo', $reason, PDO::PARAM_INT);
@@ -271,7 +252,7 @@ class Absence extends Database
      * 
      * @return boolean
      */
-    public function addAbsenceSingleDay($userId, $date, $certificate_code, $notes, $reason) 
+    public function addAbsenceSingleDay($userId, $date, $certificate_code, $notes, $reason)
     {
         $data_inizio = $date . " 08:00:00";
         $data_fine = $date . " 13:30:00";
@@ -304,7 +285,7 @@ class Absence extends Database
      * 
      * @return boolean
      */
-    public function addAbsenceMultipleDay($userId, $dates, $certificate_code, $notes, $reason) 
+    public function addAbsenceMultipleDay($userId, $dates, $certificate_code, $notes, $reason)
     {
         $data_inizio = $dates[0] . " 08:00:00";
         $data_fine = $dates[count($dates) - 1] . " 13:30:00";
@@ -323,7 +304,7 @@ class Absence extends Database
 
         $result = $stmt->execute();
         $this->divideAbsence($this->conn->lastInsertId());
-        return $result;  
+        return $result;
     }
 
     /**
@@ -370,12 +351,26 @@ class Absence extends Database
 
     public function removeAbsence($id)
     {
-        $sql = "DELETE 
+        $substitutions = $this->ungroupAbsence($id);
+
+        $deletedSubs = true;
+        foreach ($substitutions as $sub) {
+            $sql = "DELETE
+                    FROM supplenza
+                    WHERE supplenza.id = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(":id", $sub["id"], PDO::PARAM_INT);
+            $stmt->execute() ? null : $deletedSubs = false;
+        }
+
+        $sql = "DELETE
         FROM assenza
         WHERE assenza.id=:id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        return $stmt->execute();
+        $deletedAbs = $stmt->execute();
+
+        return $deletedAbs && $deletedSubs;
     }
 }

@@ -82,6 +82,10 @@ class BankController extends BaseController
                     echo json_encode(["success" => false, "data" => "Errore nell'inserimento"]);
                 }
                 break;
+            default:
+                http_response_code(400);
+                echo json_encode("Route not found");
+                break;
         }
     }
 }

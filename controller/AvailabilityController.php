@@ -124,6 +124,10 @@ class AvailabilityController extends BaseController
                 http_response_code(200);
                 echo json_encode(["success" => true, "data" => $typeAva]);
                 break;
+            default:
+                http_response_code(400);
+                echo json_encode("Route not found");
+                break;
         }
     }
 }

@@ -15,7 +15,7 @@ $uri = explode('/', $uri);
 
 /**
  *                        0          1         2         3
- *  esempio uri http://localhost/supplenze/utente/getUser.php
+ *  esempio uri http://localhost/supplenze/utente/getUser
  * 
  * 
  */

@@ -16,15 +16,16 @@ class Substitution extends Database
      */
     public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note)
     {
-        $sql = "INSERT INTO supplenza (assenza, supplente, non_necessaria, da_retribuire, ora, data_supplenza, nota)
-                VALUES (:id_absence, :id_user, :not_necessary, :to_pay, :hourr, :substitution_date, :note)";
+        // Sarebbe più sicuro prendere la data della supplenza non da front-end ma facendo una query sulla tabella "assenza" e prendendo la data da lì
+        $sql = "UPDATE supplenza
+                SET supplente = :id_user, da_retribuire = :to_pay, non_necessaria = :not_necessary, nota = :note
+                WHERE supplenza.assenza = :id_absence AND supplenza.ora = :hour";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id_absence", $id_absence, PDO::PARAM_INT);
         $stmt->bindValue(":id_user", $id_user, PDO::PARAM_INT);
         $stmt->bindValue(":not_necessary", $not_necessary, PDO::PARAM_INT);
         $stmt->bindValue(":to_pay", $to_pay, PDO::PARAM_INT);
-        $stmt->bindValue(":hourr", $hour, PDO::PARAM_INT);
-        $stmt->bindValue(":substitution_date", $substitution_date, PDO::PARAM_STR);
+        $stmt->bindValue(":hour", $hour, PDO::PARAM_INT);
         $stmt->bindValue(":note", $note, PDO::PARAM_STR);
 
         try {
@@ -40,14 +41,14 @@ class Substitution extends Database
         inner join ora o
         on o.id = s.ora
         where s.assenza = :id_absence
-        and s.ora = :hourr
+        and s.ora = :hour
         and s.data_supplenza = :substitution_date
-        and s.supplente = :id_absence";
+        and s.supplente = :id_user";
 
         $stmt1 = $this->conn->prepare($sql1);
         $stmt1->bindValue(":id_absence", $id_absence, PDO::PARAM_INT);
         $stmt1->bindValue(":id_user", $id_user, PDO::PARAM_INT);
-        $stmt1->bindValue(":hourr", $hour, PDO::PARAM_INT);
+        $stmt1->bindValue(":hour", $hour, PDO::PARAM_INT);
         $stmt1->bindValue(":substitution_date", $substitution_date, PDO::PARAM_STR);
         try {
             $stmt1->execute();
@@ -129,14 +130,13 @@ class Substitution extends Database
         $email = $stmt1->fetch(PDO::FETCH_ASSOC);
 
         // Elimino la supplenza
-        $sql = "DELETE
-        from supplenza
-        WHERE id = :id";
+        $sql = "UPDATE supplenza
+                SET supplente = null, da_retribuire = 0, non_necessaria = 0, nota = null
+                WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
         return $email;
     }
-
 }
