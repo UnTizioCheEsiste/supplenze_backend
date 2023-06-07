@@ -4,15 +4,17 @@ require_once PROJECT_ROOT_PATH . "/model/database.php";
 class Substitution extends Database
 {
     /**
-     * Aggiunge il supplente alla lezione
-     * @param int $id_absence ID dell'assenza
-     * @param int $id_user ID del supplente
-     * @param bool $not_necessary serve per indicare se la lezione ha necessità di avere il supplente o meno
-     * @param bool $to_pay indica se la supplenza è da retribuire 
-     * @param int $hour ID dell'ora di lezione
-     * @param string $substitution_date indica la data della supplenza
-     * @param string $note indica la descrizione relativa alla supplenza
-     * @return string ritorna 1 se va a buon fine, altrimenti 0
+     * Aggiunge il supplente alla lezione.
+     * 
+     * @param int $id_absence ID dell'assenza.
+     * @param int $id_user ID del supplente.
+     * @param bool $not_necessary serve per indicare se la lezione ha necessità di avere il supplente o meno.
+     * @param bool $to_pay indica se la supplenza è da retribuire.
+     * @param int $hour ID dell'ora di lezione.
+     * @param string $substitution_date indica la data della supplenza.
+     * @param string $note indica la descrizione relativa alla supplenza.
+     * 
+     * @return string ritorna 1 se va a buon fine, altrimenti 0.
      */
     public function addSubstitute($id_absence, $id_user, $not_necessary, $to_pay, $hour, $substitution_date, $note)
     {
@@ -60,8 +62,9 @@ class Substitution extends Database
     }
 
     /**
-     * Restituisce la lista delle supplenze
-     * @return Substitution tutte le informazioni relative alla supplenza
+     * Restituisce la lista delle supplenze.
+     * 
+     * @return mixed tutte le informazioni relative alla supplenza.
      */
     public function getArchiveSubstitution()
     {
@@ -89,9 +92,11 @@ class Substitution extends Database
     }
 
     /**
-     * Restituisce tutte le supplenze fatte da un docente
-     * @param int $id_user ID del docente
-     * @return Substitution tutte le informazioni utili relative alla supplenza
+     * Restituisce tutte le supplenze fatte da un docente.
+     * 
+     * @param int $id_user ID del docente.
+     * 
+     * @return mixed tutte le informazioni utili relative alla supplenza.
      */
     public function getArchiveUserSubstitution($id_user)
     {
@@ -109,9 +114,11 @@ class Substitution extends Database
     }
 
     /**
-     * Restituisce tutte le supplenze fatte da un docente
-     * @param int $id ID della supplenza
-     * @return string ritorna l'email
+     * Restituisce tutte le supplenze fatte da un docente.
+     * 
+     * @param int $id ID della supplenza.
+     * 
+     * @return string ritorna l'email.
      */
     public function removeSubstitution($id)
     {
