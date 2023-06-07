@@ -93,7 +93,6 @@ class UserController extends BaseController
                 break;
 
             case "register":
-                // BISOGNA GESTIRE L'INVIO DELLA EMAIL
                 $json = file_get_contents('php://input');
                 $data = json_decode($json);
 
@@ -210,14 +209,6 @@ class UserController extends BaseController
                     echo json_encode(["success" => false, "data" => "Id non inserito"]);
                     break;
                 }
-                //rotta di prova per l'invio di mail con indirizzo mail fisso di destinazione
-            case 'provaEmail':
-                $result = $this->sendMail("pirra.francesco@iisviolamarchesini.edu.it", "Prova", "Prova email");
-                if ($result['status'])
-                    echo 'Email inviata con successo!';
-                else
-                    echo 'Errore durante l\'invio della email: ' . $result["error"];
-                break;
                 //pone il campo active=0
             case 'removeUser':
                 $params = $this->getQueryStringParams();
