@@ -111,12 +111,12 @@ class UserController extends BaseController
                         http_response_code(200);
                         echo json_encode(["success" => true, "data" => "Email inviata correttamente."]);
                     } else {
-                        http_response_code(400);
+                        http_response_code(500);
                         echo json_encode(["success" => false, "data" => "Errore nell'invio della mail"]);
                     }
                 } else {
                     //messaggio errore
-                    http_response_code(400);
+                    http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Errore nell'esecuzione della registrazione"]);
                 }
                 break;
