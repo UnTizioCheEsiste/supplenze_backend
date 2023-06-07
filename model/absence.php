@@ -6,6 +6,7 @@ class Absence extends Database
 {
     /**
      * Ottiene la lista delle assenze (non ottiene se sono state coperte oppure no perchè questo sarà nello storico supplenze)
+     * 
      * @return mixed lista di assenze
      */
     public function getArchiveAbsence()
@@ -329,9 +330,11 @@ class Absence extends Database
     }
 
     /**
-     * Visualizza le supplenze relative ad una assenza
-     * @param int $id l'id dell'assenza 
-     * @return mixed lista delle assenze con relativo supplente che le ha coperte 
+     * Visualizza le supplenze relative ad una assenza.
+     * 
+     * @param int $id l'id dell'assenza.
+     * 
+     * @return mixed lista delle assenze con relativo supplente che le ha coperte.
      */
     public function ungroupAbsence($id)
     {
@@ -349,10 +352,19 @@ class Absence extends Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Rimuove una assenza e le relative supplenze da coprire.
+     * 
+     * @param int $id ID dell'assenza.
+     * 
+     * @return bool True se l'eminazione è andata a buon fine.
+     */
     public function removeAbsence($id)
     {
+        // Per vincoli referenziali prima vengono eliminate le supplenze, successivamente l'assenza
         $substitutions = $this->ungroupAbsence($id);
 
+        // Se una delle eliminazioni non va a buon fine la variabile assume valore false
         $deletedSubs = true;
         foreach ($substitutions as $sub) {
             $sql = "DELETE
