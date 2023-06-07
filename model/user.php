@@ -7,7 +7,7 @@ class User extends Database
      * Ottieni i dati dell'utente di cui passi l'id.
      * 
      * @param int $userId ID dell'utente.
-     * @return User l'utente con l'id inserito
+     * @return mixed l'utente con l'id inserito
      */
     public function getUser($userId)
     {
@@ -76,7 +76,8 @@ class User extends Database
      * @param string $email Email dell'utente.
      * @param string $telefono Numero di telefono dell'utente.
      * @param int $privilegio Il tipo di privilegio che l'utente avrà.
-     * @return string $password se registrato correttamente altrimenti 0
+     * 
+     * @return string $password se registrato correttamente altrimenti 0.
      */
     public function register($nome, $cognome, $email, $telefono, $privilegio)
     {
@@ -119,12 +120,13 @@ class User extends Database
     }
 
     /**
-     * Cambia password. 2 scenari o cambio normale (update di user) o cambio successivo a un reset (update di user e di reset)
+     * Cambia password. 2 scenari o cambio normale (update di user) o cambio successivo a un reset (update di user e di reset).
      * 
      * @param int $userId ID dell'utente.
      * @param string $oldPassword Vecchia password dell'utente.
      * @param string $newPassword Nuova password dell'utente.
-     * @return int il numero di righe aggiornate (deve essere 1)
+     * 
+     * @return int il numero di righe aggiornate (deve essere 1).
      */
     public function changePassword($userId, $oldPassword, $newPassword)
     {
@@ -186,10 +188,12 @@ class User extends Database
     }
 
     /**
-     * Resetta la password aggiungendone una generata casualmente nella tabella reset
-     * @param int $userId l'id dell'utente
-     * @param string $email l'email dell'utente
-     * @return int il numero di righe aggiornate
+     * Resetta la password aggiungendone una generata casualmente nella tabella reset.
+     * 
+     * @param int $userId l'id dell'utente.
+     * @param string $email l'email dell'utente.
+     * 
+     * @return int il numero di righe aggiornate.
      */
     public function resetPassword($userId, $email)
     {
@@ -209,8 +213,9 @@ class User extends Database
     }
 
     /**
-     * Restituisce tutta la lista di utenti registrata al software
-     * @return User[] gli utenti con i relativi dati (nome,cognome,email.privilegio,telefono)
+     * Restituisce tutta la lista di utenti registrata al software.
+     * 
+     * @return mixed[] gli utenti con i relativi dati (nome,cognome,email.privilegio,telefono).
      */
     public function getArchiveUser()
     {
@@ -225,9 +230,11 @@ class User extends Database
     }
 
     /**
-     * Ritorna la lista delle assenze fatte da un determinato utente
-     * @param int $id l'id dell'utente 
-     * @return mixed nome dell'utente e: motivo, date, certificato note di ogni assenza
+     * Ritorna la lista delle assenze fatte da un determinato utente.
+     * 
+     * @param int $id l'id dell'utente.
+     * 
+     * @return mixed nome dell'utente e: motivo, date, certificato note di ogni assenza.
      */
     public function getArchiveUserAbsence($id)
     {
@@ -244,9 +251,11 @@ class User extends Database
     }
 
     /**
-     * Attiva un utente mettendo il campo active a 1
-     * @param int $id l'id dell'utente
-     * @return bool true o false
+     * Attiva un utente mettendo il campo active a 1.
+     * 
+     * @param int $id l'id dell'utente.
+     * 
+     * @return bool true o false.
      */
     public function activateUser($id)
     {
@@ -261,9 +270,11 @@ class User extends Database
     }
 
     /**
-     * Disattiva un utente mettendo il campo active a 0
-     * @param int $id l'id dell'utente
-     * @return bool true o false
+     * Disattiva un utente mettendo il campo active a 0.
+     * 
+     * @param int $id l'id dell'utente.
+     * 
+     * @return bool true o false.
      */
     public function removeUser($id)
     {
