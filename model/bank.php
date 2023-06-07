@@ -90,11 +90,11 @@ class Bank extends Database
     }
 
     /**
-     * Cancella l'insieme delle ore identificate dall'id della banca ore
+     * Cancella l'insieme delle ore identificate dall'id della banca ore.
      * 
-     * @param int $id ID della riga nella banca ore
+     * @param int $id ID della riga nella banca ore.
      * 
-     * @return int Numero di righe cancellate (se tutto va a buon fine dovrebbe essere 1)
+     * @return int Numero di righe cancellate (se tutto va a buon fine dovrebbe essere 1).
      */
     public function removeHours($id)
     {
