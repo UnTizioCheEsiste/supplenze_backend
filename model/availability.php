@@ -42,15 +42,15 @@ class Availability extends Database
      * @param int $hour = ID dell'ora di lezione
      * @return Availability disponibilita temporanee + permanenti
      */
-    public function getArchiveAvailabilityHour($date, $hours)
+    public function getArchiveAvailabilityHour($date, $hour)
     {
         $time = new Time();
         // Ora inizio disponibilità
-        $hour = $time->getHourById($hours[0]);
+        $hourTime = $time->getHourById($hour);
 
         // Concatenzione giorno e ora
-        $start_date = $date . " " . $hour["data_inizio"];
-        $finish_date = $date . " " . $hour["data_fine"];
+        $start_date = $date . " " . $hourTime["data_inizio"];
+        $finish_date = $date . " " . $hourTime["data_fine"];
 
         /* Trovo i docenti con disponibilita TEMPORANEA che sono liberi quel determinato giorno
          * a quella determinata ora*/
@@ -59,42 +59,33 @@ class Availability extends Database
         inner join utente u 
         on u.id = d.docente
         inner join tipo_disponibilita td
-        on td.id = d.tipo_disponibilita 
-        where :startdate between d.data_inizio and d.data_fine
-        and :finishdate between d.data_inizio and d.data_fine and u.attivo=1";
+        on td.id = d.tipo_disponibilita
+        WHERE d.data_inizio <= :startdate AND d.data_fine >= :finishdate and u.attivo = 1";
 
         $stmt1 = $this->conn->prepare($sql1);
         $stmt1->bindValue(":startdate", $start_date, PDO::PARAM_STR);
         $stmt1->bindValue(":finishdate", $finish_date, PDO::PARAM_STR);
-        try{
-            $stmt1->execute();
-        } catch(Exception $e){
-            return 0;
-        }
+        $stmt1->execute();
         $result1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
         /* Trovo i docenti con disponibilita PERMANENTI che sono liberi quel giorno della settimana
          * a quell'ora di lezione */
         $dayofweek = date('w', strtotime($date));
         $sql2 = "SELECT u.id as id_docente, concat(u.nome, ' ', u.cognome) as docente, td.nome as tipo_disponibilita
-        from disponibilita d 
-        inner join utente u 
+        from disponibilita d
+        inner join utente u
         on u.id = d.docente
-        inner join tipo_disponibilita td 
-        on td.id = d.tipo_disponibilita 
-        inner join giorno g 
+        inner join tipo_disponibilita td
+        on td.id = d.tipo_disponibilita
+        inner join giorno g
         on g.id = d.giorno
-        where d.ora = :hourr
+        where d.ora = :hour
         and g.id = :dayofweek";
 
         $stmt2 = $this->conn->prepare($sql2);
-        $stmt2->bindValue(":hourr", $hours, PDO::PARAM_INT);
+        $stmt2->bindValue(":hour", $hour, PDO::PARAM_INT);
         $stmt2->bindValue(":dayofweek", $dayofweek, PDO::PARAM_INT);
-        try{
-            $stmt2->execute();
-        } catch(Exception $e){
-            return 0;
-        }
+        $stmt2->execute();
         $result2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         return array_merge($result1, $result2);
     }

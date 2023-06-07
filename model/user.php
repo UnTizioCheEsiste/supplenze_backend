@@ -50,7 +50,7 @@ class User extends Database
                 FROM `reset` r
                 INNER JOIN utente u ON u.id = r.id_utente
                 WHERE u.email = :email AND r.`password` = :password AND u.attivo=1";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":email", $email, PDO::PARAM_STR);
         $stmt->bindValue(":password", $password, PDO::PARAM_STR);
@@ -60,13 +60,13 @@ class User extends Database
         $pwdLoginReset = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Controllo che esista l'user_id, che la data dell'expires sia maggiore del giorno attuale e che la reset non sia completed
-        if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["data_scadenza"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completato"] == 0){
-            return $pwdLoginReset["id"];//ritorno il dato da reset
+        if (!empty($pwdLoginReset["id"]) && strtotime($pwdLoginReset["data_scadenza"]) > strtotime(date("Y-m-d")) && $pwdLoginReset["completato"] == 0) {
+            return $pwdLoginReset["id"]; //ritorno il dato da reset
         }
         //ritorno il dato dal login iniziale 
         return $pwdLoginNormale;
     }
-    
+
 
     /**
      * Registra l'utente.
@@ -81,7 +81,7 @@ class User extends Database
     public function register($nome, $cognome, $email, $telefono, $privilegio)
     {
         //controllo che l'utente non sia già registrato
-        if($this->search($email)!=0){
+        if ($this->search($email) != 0) {
             return false;
         }
         // Generazione di una password casuale
@@ -91,7 +91,7 @@ class User extends Database
         //inserisco il record e nel caso avvena con successo l'inserimento ritorno la password altrimenti 0
         $sql = "insert into utente  (nome, cognome, email, `password` , telefono, privilegio)
                 values (:nome, :cognome, :email, :password, :telefono, :privilegio);";
-       
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":nome", $nome, PDO::PARAM_STR);
         $stmt->bindValue(":cognome", $cognome, PDO::PARAM_STR);
@@ -101,12 +101,9 @@ class User extends Database
         $stmt->bindValue(":privilegio", $privilegio, PDO::PARAM_INT);
 
 
-        try 
-        {
+        try {
             return $stmt->execute();
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
             return false;
         }
     }
@@ -114,7 +111,7 @@ class User extends Database
     //metodo per il controllo delle registrazioni 
     public function search($email)
     {
-        $sql="SELECT id FROM utente where utente.email=:email";
+        $sql = "SELECT id FROM utente where utente.email=:email";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(":email", $email, PDO::PARAM_STR);
         $stmt->execute();
@@ -142,15 +139,14 @@ class User extends Database
         $stmt->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
 
         $stmt->execute();
-        
+
         //se la modifica va a buonfine allora le credenziali erano corrette e la password è stata aggiornata
-        if($stmt->rowCount()==1)
-        {
+        if ($stmt->rowCount() == 1) {
             return $stmt->rowCount();
-        //altrimenti controllo nella tabella reset
-        }else{
+            //altrimenti controllo nella tabella reset
+        } else {
             //in questa query faccio l'update solo se combacia la password nella tabella reset, se non è stata già resettata e se la data attuale è nell'intervallo 
-            $sql2="UPDATE utente u
+            $sql2 = "UPDATE utente u
             SET u.password = :newPassword
             WHERE u.id = :userId
             AND EXISTS ( 
@@ -161,21 +157,20 @@ class User extends Database
             AND now()<r.data_scadenza
             and now()>r.data_richiesta
             )";
-            
+
             $stmt2 = $this->conn->prepare($sql2);
             $stmt2->bindValue(":userId", $userId, PDO::PARAM_INT);
             $stmt2->bindValue(":oldPassword", $oldPassword, PDO::PARAM_STR);
             $stmt2->bindValue(":newPassword", $newPassword, PDO::PARAM_STR);
 
             $stmt2->execute();
-            
+
             //nel caso la query precedente restituisca rowCount 1 allora segnalo che il reset è avvenuto
-            if($stmt2->rowCount()==1)
-            {
-                $sql3="UPDATE reset 
+            if ($stmt2->rowCount() == 1) {
+                $sql3 = "UPDATE reset 
                 set reset.completed=1
                 where reset.id_utente=:id_utente";
-            
+
                 $stmt3 = $this->conn->prepare($sql3);
                 $stmt3->bindValue(":userId", $userId, PDO::PARAM_INT);
                 $stmt3->bindValue(":oldPassword", $oldPassword, PDO::PARAM_STR);
@@ -184,14 +179,14 @@ class User extends Database
                 $stmt3->execute();
 
                 return $stmt3->rowCount();
-            }else{
+            } else {
                 return 0;
             }
         }
     }
 
     /**
-     * resetta la password aggiungendone una generata casualmente nella tabella reset
+     * Resetta la password aggiungendone una generata casualmente nella tabella reset
      * @param int $userId l'id dell'utente
      * @param string $email l'email dell'utente
      * @return int il numero di righe aggiornate
@@ -212,6 +207,7 @@ class User extends Database
 
         return $stmt->rowCount();
     }
+
     /**
      * Restituisce tutta la lista di utenti registrata al software
      * @return User[] gli utenti con i relativi dati (nome,cognome,email.privilegio,telefono)
@@ -246,8 +242,9 @@ class User extends Database
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     /**
-     * attiva un utente mettendo il campo active a 1
+     * Attiva un utente mettendo il campo active a 1
      * @param int $id l'id dell'utente
      * @return bool true o false
      */
@@ -264,7 +261,7 @@ class User extends Database
     }
 
     /**
-     * disattiva un utente mettendo il campo active a 0
+     * Disattiva un utente mettendo il campo active a 0
      * @param int $id l'id dell'utente
      * @return bool true o false
      */
@@ -272,22 +269,6 @@ class User extends Database
     {
         $sql = "UPDATE utente
         SET utente.attivo=0
-        WHERE utente.id=:id";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
-        return $stmt->execute();
-    }
-
-    /**
-     * elimina un utente dal database
-     * @param int $id l'id dell'utente
-     * @return bool true o false
-     */
-    public function deleteUser($id)
-    {
-        $sql = "DELETE 
-        FROM utente
         WHERE utente.id=:id";
 
         $stmt = $this->conn->prepare($sql);
