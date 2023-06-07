@@ -249,22 +249,6 @@ class UserController extends BaseController
                     echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
                 }
                 break;
-                //elimina l'utente dalla tabella user 
-            case 'deleteUser':
-                $params = $this->getQueryStringParams();
-                if (empty($params["id"])) {
-                    http_response_code(404);
-                    echo json_encode(["success" => false, "data" => "Id non inserito"]);
-                    break;
-                }
-                if ($result = $user->deleteUser($params["id"])) {
-                    http_response_code(200);
-                    echo json_encode(["success" => true, "data" => $result]);
-                } else {
-                    http_response_code(500);
-                    echo json_encode(["success" => false, "data" => "Errore nell'esecuzione"]);
-                }
-                break;
             default:
                 http_response_code(400);
                 echo json_encode("Route not found");
