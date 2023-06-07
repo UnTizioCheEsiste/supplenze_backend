@@ -136,7 +136,7 @@ class UserController extends BaseController
                     echo json_encode(["success" => true, "data" => "Password cambiata con successo."]);
                 } else {
                     //messaggio errore
-                    http_response_code(401);
+                    http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Errore nella modifica della password."]);
                 }
                 break;
@@ -166,12 +166,12 @@ class UserController extends BaseController
                         http_response_code(200);
                         echo json_encode(["success" => true, "data" => "Email inviata correttamente."]);
                     } else {
-                        http_response_code(400);
+                        http_response_code(500);
                         echo json_encode(["success" => false, "data" => "Errore nell'invio della mail"]);
                     }
                 } else {
                     //messaggio errore
-                    http_response_code(400);
+                    http_response_code(500);
                     echo json_encode(["success" => false, "data" => "Errore nel reset della password."]);
                 }
                 break;
