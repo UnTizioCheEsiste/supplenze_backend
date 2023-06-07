@@ -15,44 +15,44 @@ $uri = explode('/', $uri);
 
 /**
  *                        0          1         2         3
- *  esempio uri http://localhost/supplenze/utente/getUser
+ *  esempio uri http://localhost/supplenze/user/getUser
  * 
  * 
  */
 
-//switch sull'url per smistare a uno dei vari controller
+// Switch sull'url per smistare a uno dei vari controller
 switch ($uri[2]) {
-    case "utente":
+    case "user":
         require PROJECT_ROOT_PATH . "/controller/UserController.php";
         $user = new UserController($uri[3]);
-        $user->processRequest();//questo metodo processa la richiesta guardando alla parte dell'url dopo UserController
+        $user->processRequest(); // Questo metodo processa la richiesta guardando alla parte dell'url dopo UserController
         break;
-    case "assenza":
+    case "absence":
         require PROJECT_ROOT_PATH . "/controller/AbsenceController.php";
         $absence = new AbsenceController($uri[3]);
         $absence->processRequest();
         break;
-    case "disponibilita":
+    case "availability":
         require PROJECT_ROOT_PATH . "/controller/AvailabilityController.php";
         $availability = new AvailabilityController($uri[3]);
         $availability->processRequest();
         break;
-    case "privilegi":
+    case "privilege":
         require PROJECT_ROOT_PATH . "/controller/PrivilegeController.php";
         $privilege = new PrivilegeController($uri[3]);
         $privilege->processRequest();
         break;
-    case "bancaore":
+    case "bank":
         require PROJECT_ROOT_PATH . "/controller/BankController.php";
         $bank = new BankController($uri[3]);
         $bank->processRequest();
         break;
-    case "supplenza":
+    case "substitution":
         require PROJECT_ROOT_PATH . "/controller/SubstitutionController.php";
         $substitution = new SubstitutionController($uri[3]);
         $substitution->processRequest();
         break;
-    case "tempo":
+    case "time":
         require PROJECT_ROOT_PATH . "/controller/TimeController.php";
         $time = new TimeController($uri[3]);
         $time->processRequest();
